@@ -1,0 +1,346 @@
+{
+  "name": "box-vscode-extension",
+  "displayName": "box-vscode-extension",
+  "description": "",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.109.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:box-project.json"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "box-vscode-extension.createProject",
+        "title": "Box: Create Box Project"
+      },
+      {
+        "command": "box-vscode-extension.resetWorkspaceContext",
+        "title": "Box: Reset Workspace Context"
+      },
+      {
+        "command": "box-vscode-extension.authorize",
+        "title": "Box: Authorize Connection (OAuth 2.0)"
+      },
+      {
+        "command": "box-vscode-extension.displayAllConnections",
+        "title": "Box: Display All Box Connections"
+      },
+      {
+        "command": "box-vscode-extension.displayDefaultConnection",
+        "title": "Box: Display the Default Box Connection"
+      },
+      {
+        "command": "box-vscode-extension.setDefaultConnection",
+        "title": "Box: Set the Default Box Connection"
+      },
+      {
+        "command": "box-vscode-extension.removeConnection",
+        "title": "Box: Remove Box Connection"
+      },
+      {
+        "command": "box-vscode-extension.getAccessToken",
+        "title": "Box: Get Access Token"
+      },
+      {
+        "command": "box-vscode-extension.createDevApp",
+        "title": "Box: Create Box Developer Application"
+      },
+      {
+        "command": "box-vscode-extension.refreshAllFiles",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "box-vscode-extension.previewFile",
+        "title": "Box: Preview File"
+      },
+      {
+        "command": "box-vscode-extension.refreshConfiguration",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "box-vscode-extension.showMetadataTemplate",
+        "title": "Box: Show Metadata Template",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "box-vscode-extension.copyToClipboard",
+        "title": "Copy to Clipboard",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "box-vscode-extension.saveMetadataTemplateJson",
+        "title": "Save Template JSON",
+        "icon": "$(desktop-download)"
+      },
+      {
+        "command": "box-vscode-extension.showMetadataTaxonomy",
+        "title": "Box: Show Metadata Taxonomy",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "box-vscode-extension.saveMetadataTaxonomyJson",
+        "title": "Save Taxonomy JSON",
+        "icon": "$(desktop-download)"
+      },
+      {
+        "command": "box-vscode-extension.showTaxonomyNode",
+        "title": "Box: Show Taxonomy Node",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "box-vscode-extension.createMetadataTemplate",
+        "title": "Create Metadata Template",
+        "icon": "$(add)"
+      },
+      {
+        "command": "box-vscode-extension.createMetadataTaxonomy",
+        "title": "Create Metadata Taxonomy",
+        "icon": "$(add)"
+      },
+      {
+        "command": "box-vscode-extension.openUIElement",
+        "title": "Box: Open UI Element"
+      },
+      {
+        "command": "box-vscode-extension.openMetadataQueryBuilder",
+        "title": "Box: Metadata Query Builder",
+        "icon": "$(search)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "box-vscode-extension.refreshAllFiles",
+          "when": "view == box-vscode-extension.allFilesView",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.refreshConfiguration",
+          "when": "view == box-vscode-extension.configurationView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "box-vscode-extension.previewFile",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == file",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.copyToClipboard",
+          "when": "view == box-vscode-extension.configurationView && viewItem == metadataTemplate",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.saveMetadataTemplateJson",
+          "when": "view == box-vscode-extension.configurationView && viewItem == metadataTemplate",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.showMetadataTemplate",
+          "when": "view == box-vscode-extension.configurationView && viewItem == metadataTemplate",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.copyToClipboard",
+          "when": "view == box-vscode-extension.configurationView && viewItem == metadataTaxonomy",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.saveMetadataTaxonomyJson",
+          "when": "view == box-vscode-extension.configurationView && viewItem == metadataTaxonomy",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.showMetadataTaxonomy",
+          "when": "view == box-vscode-extension.configurationView && viewItem == metadataTaxonomy",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.createMetadataTemplate",
+          "when": "view == box-vscode-extension.configurationView && viewItem == subcategoryTemplates",
+          "group": "inline"
+        },
+        {
+          "command": "box-vscode-extension.createMetadataTaxonomy",
+          "when": "view == box-vscode-extension.configurationView && viewItem == categoryTaxonomies",
+          "group": "inline"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "box-vscode-extension.createProject",
+          "when": "!project.generated"
+        },
+        {
+          "command": "box-vscode-extension.resetWorkspaceContext",
+          "when": "debug.running == true"
+        },
+        {
+          "command": "box-vscode-extension.authorize",
+          "when": "project.generated"
+        },
+        {
+          "command": "box-vscode-extension.displayAllConnections",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.displayDefaultConnection",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.setDefaultConnection",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.removeConnection",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.getAccessToken",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.previewFile",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.refreshConfiguration",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showMetadataTemplate",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.copyToClipboard",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.saveMetadataTemplateJson",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showMetadataTaxonomy",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.saveMetadataTaxonomyJson",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showTaxonomyNode",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.createMetadataTemplate",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.createMetadataTaxonomy",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.openUIElement",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.openMetadataQueryBuilder",
+          "when": "false"
+        }
+      ]
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "box-explorer",
+          "title": "Box",
+          "icon": "resources/box.png"
+        }
+      ]
+    },
+    "views": {
+      "box-explorer": [
+        {
+          "id": "box-vscode-extension.allFilesView",
+          "name": "All Files"
+        },
+        {
+          "id": "box-vscode-extension.configurationView",
+          "name": "Configuration"
+        },
+        {
+          "id": "box-vscode-extension.uiElementsView",
+          "name": "UI Elements"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "box-vscode-extension.allFilesView",
+        "contents": "No Box files to show.\n[Authorize Connection](command:box-vscode-extension.authorize)",
+        "when": "!box.authenticated"
+      },
+      {
+        "view": "box-vscode-extension.configurationView",
+        "contents": "No configuration available.\n[Create Box Project](command:box-vscode-extension.createProject)",
+        "when": "!project.generated"
+      },
+      {
+        "view": "box-vscode-extension.uiElementsView",
+        "contents": "No UI elements to display."
+      }
+    ],
+    "configuration": {
+      "title": "Box",
+      "properties": {
+        "box.clientId": {
+          "type": "string",
+          "default": "",
+          "description": "Box application Client ID (from the Box Developer Console)"
+        },
+        "box.clientSecret": {
+          "type": "string",
+          "default": "",
+          "description": "Box application Client Secret (from the Box Developer Console)"
+        },
+        "box.callbackUrl": {
+          "type": "string",
+          "default": "http://localhost:3000/callback",
+          "description": "Full OAuth 2.0 redirect URI. Must match the redirect URI registered in your Box app."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "22.x",
+    "@types/vscode": "^1.109.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.54.0"
+  },
+  "dependencies": {
+    "box-annotations": "^5.2.1-beta.0",
+    "box-node-sdk": "^10.4.0",
+    "box-ui-elements": "^26.0.0"
+  }
+}
