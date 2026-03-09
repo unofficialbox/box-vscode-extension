@@ -113,6 +113,26 @@
         "command": "box-vscode-extension.openMetadataQueryBuilder",
         "title": "Box: Metadata Query Builder",
         "icon": "$(search)"
+      },
+      {
+        "command": "box-vscode-extension.deployToCurrentEnterprise",
+        "title": "Box: Deploy to Default Box Enterprise",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "box-vscode-extension.deployToTargetEnterprise",
+        "title": "Box: Deploy to Target Box Enterprise",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
+        "title": "Box: Diff and Deploy to Default Box Enterprise",
+        "icon": "$(diff)"
+      },
+      {
+        "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
+        "title": "Box: Diff and Deploy to Target Box Enterprise",
+        "icon": "$(diff)"
       }
     ],
     "menus": {
@@ -173,6 +193,48 @@
           "command": "box-vscode-extension.createMetadataTaxonomy",
           "when": "view == box-vscode-extension.configurationView && viewItem == categoryTaxonomies",
           "group": "inline"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "box-vscode-extension.deployToCurrentEnterprise",
+          "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
+          "group": "box@1"
+        },
+        {
+          "command": "box-vscode-extension.deployToTargetEnterprise",
+          "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
+          "group": "box@2"
+        },
+        {
+          "command": "box-vscode-extension.deployToCurrentEnterprise",
+          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
+          "group": "box@1"
+        },
+        {
+          "command": "box-vscode-extension.deployToTargetEnterprise",
+          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
+          "group": "box@2"
+        },
+        {
+          "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
+          "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
+          "group": "box@3"
+        },
+        {
+          "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
+          "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
+          "group": "box@4"
+        },
+        {
+          "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
+          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
+          "group": "box@3"
+        },
+        {
+          "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
+          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
+          "group": "box@4"
         }
       ],
       "commandPalette": [
@@ -255,6 +317,22 @@
         {
           "command": "box-vscode-extension.openMetadataQueryBuilder",
           "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.deployToCurrentEnterprise",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.deployToTargetEnterprise",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
+          "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
+          "when": "project.generated && box.authenticated"
         }
       ]
     },

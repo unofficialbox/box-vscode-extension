@@ -425,10 +425,28 @@ function getWebviewHtml(
 		.results-header {
 			font-size: 1.1em; font-weight: 600; margin-top: 12px; margin-bottom: 8px;
 			display: none;
+			align-items: center; gap: 12px;
 		}
 		.results-header .count {
 			font-weight: 400; color: var(--vscode-descriptionForeground);
 		}
+		.results-filter {
+			margin-left: auto;
+			display: flex; align-items: center; gap: 6px;
+			font-size: 0.82rem; font-weight: 400;
+		}
+		.results-filter input {
+			background: var(--vscode-input-background);
+			color: var(--vscode-input-foreground);
+			border: 1px solid var(--vscode-input-border, rgba(128,128,128,0.3));
+			border-radius: 3px;
+			padding: 3px 8px;
+			font-family: inherit;
+			font-size: inherit;
+			width: 200px;
+		}
+		.results-filter input:focus { outline: 1px solid var(--vscode-focusBorder); }
+		.results-filter input::placeholder { color: var(--vscode-input-placeholderForeground); }
 		.results-block {
 			background: #1e1e2e;
 			border: 1px solid #313244;
@@ -445,9 +463,12 @@ function getWebviewHtml(
 		}
 
 		.explorer-container {
-			width: 100%;
 			height: 600px;
-			margin-top: 12px;
+			margin: 12px 0 0;
+			box-sizing: border-box;
+		}
+		.bce-ContentExplorer-main {
+			padding: 0 20px;
 		}
 		.explorer-placeholder {
 			color: var(--vscode-descriptionForeground);
@@ -463,6 +484,8 @@ function getWebviewHtml(
 			margin-bottom: 12px;
 			overflow: hidden;
 		}
+		#accordion-results { overflow: visible; }
+	#accordion-results > .accordion-body { overflow: visible; }
 		.accordion-header {
 			display: flex; align-items: center; gap: 8px;
 			padding: 10px 14px;
@@ -597,7 +620,7 @@ function getWebviewHtml(
 			</div>
 
 			<div id="tab-http" class="tab-content active">
-				<div class="results-header" id="results-header">Results <span class="count" id="results-count"></span></div>
+				<div class="results-header" id="results-header">Results <span class="count" id="results-count"></span><span class="results-filter"><input type="text" id="results-filter-input" placeholder="Filter by key or value..." /></span></div>
 				<div class="results-block" id="results-block"></div>
 			</div>
 
@@ -620,7 +643,9 @@ function getWebviewHtml(
 		var resultsHeader = document.getElementById('results-header');
 		var resultsCount = document.getElementById('results-count');
 		var resultsBlock = document.getElementById('results-block');
+		var resultsFilterInput = document.getElementById('results-filter-input');
 		var nextBtn = document.getElementById('next-btn');
+		var lastResultData = null;
 		var tabBar = document.getElementById('tab-bar');
 		var templateDropdown = document.getElementById('template-dropdown');
 		var fromInput = document.getElementById('from-input');
@@ -1065,6 +1090,8 @@ function getWebviewHtml(
 				},
 				metadataViewProps: {
 					columns: columns,
+					isSelectionEnabled: true,
+
 				},
 			});
 		}
@@ -1100,6 +1127,66 @@ function getWebviewHtml(
 				.replace(/\\b(-?\\d+\\.?\\d*([eE][+-]?\\d+)?)\\b/g, '<span style="color:#fab387">$1</span>');
 		}
 
+		// ─── Filter results ─────────────────────────────
+		function filterJson(obj, term) {
+			if (obj === null || obj === undefined) return null;
+			if (Array.isArray(obj)) {
+				var filtered = [];
+				for (var i = 0; i < obj.length; i++) {
+					var item = filterJson(obj[i], term);
+					if (item !== null) filtered.push(item);
+				}
+				return filtered.length > 0 ? filtered : null;
+			}
+			if (typeof obj === 'object') {
+				var result = {};
+				var hasMatch = false;
+				var keys = Object.keys(obj);
+				for (var k = 0; k < keys.length; k++) {
+					var key = keys[k];
+					var val = obj[key];
+					var keyMatch = key.toLowerCase().indexOf(term) !== -1;
+					var valStr = (val === null || val === undefined) ? 'null' : String(val);
+					var valMatch = typeof val !== 'object' && valStr.toLowerCase().indexOf(term) !== -1;
+					if (keyMatch || valMatch) {
+						result[key] = val;
+						hasMatch = true;
+					} else if (typeof val === 'object' && val !== null) {
+						var nested = filterJson(val, term);
+						if (nested !== null) {
+							result[key] = nested;
+							hasMatch = true;
+						}
+					}
+				}
+				// Always include id and type when the object has any match
+				if (hasMatch) {
+					if (obj.id !== undefined && result.id === undefined) result.id = obj.id;
+					if (obj.type !== undefined && result.type === undefined) result.type = obj.type;
+				}
+				return hasMatch ? result : null;
+			}
+			var s = String(obj);
+			return s.toLowerCase().indexOf(term) !== -1 ? obj : null;
+		}
+
+		resultsFilterInput.addEventListener('input', function() {
+			if (!lastResultData) return;
+			var term = resultsFilterInput.value.trim().toLowerCase();
+			if (!term) {
+				resultsBlock.innerHTML = syntaxHighlight(JSON.stringify(lastResultData, null, 2));
+				var entries = (lastResultData && lastResultData.entries) || [];
+				resultsCount.textContent = '(' + entries.length + ')';
+				return;
+			}
+			var filtered = filterJson(lastResultData, term);
+			if (filtered === null) filtered = {};
+			var filteredEntries = (filtered && filtered.entries) || [];
+			var totalEntries = (lastResultData && lastResultData.entries) || [];
+			resultsCount.textContent = '(' + filteredEntries.length + ' / ' + totalEntries.length + ')';
+			resultsBlock.innerHTML = syntaxHighlight(JSON.stringify(filtered, null, 2));
+		});
+
 		// ─── Message handler ────────────────────────────
 		window.addEventListener('message', function(e) {
 			var msg = e.data;
@@ -1134,9 +1221,11 @@ function getWebviewHtml(
 				document.getElementById('accordion-results').classList.remove('collapsed');
 
 				// HTTP tab
-				resultsHeader.style.display = 'block';
+				resultsHeader.style.display = 'flex';
 				resultsCount.textContent = '(' + entries.length + ')';
 				resultsBlock.style.display = 'block';
+				lastResultData = msg.data;
+				resultsFilterInput.value = '';
 				resultsBlock.innerHTML = syntaxHighlight(JSON.stringify(msg.data, null, 2));
 				currentMarker = msg.nextMarker || '';
 				nextBtn.style.display = currentMarker ? 'inline-block' : 'none';

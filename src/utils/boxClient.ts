@@ -114,3 +114,59 @@ export async function getBoxClient(): Promise<BoxClientResult | undefined> {
 
 	return cachedResult;
 }
+
+/**
+ * Creates a BoxClient for a specific connection alias (not cached).
+ * Used for deploying to a target enterprise that may differ from the default.
+ * Clears the module-level cache to prevent SDK-level token interference,
+ * and verifies the resulting token belongs to the expected enterprise.
+ */
+export async function getBoxClientForAlias(alias: string): Promise<BoxClientResult | undefined> {
+	const conn = await getConnection(alias);
+	if (!conn) { return undefined; }
+
+	// Clear any cached default client to prevent SDK-level token sharing
+	clearBoxClientCache();
+
+	const tokenStorage = new ConnectionTokenStorage(alias);
+	await tokenStorage.store({
+		accessToken: conn.accessToken,
+		refreshToken: conn.refreshToken,
+	});
+
+	const oauthConfig = new OAuthConfig({
+		clientId: conn.clientId,
+		clientSecret: conn.clientSecret,
+		tokenStorage,
+	});
+
+	const auth = new BoxOAuth({ config: oauthConfig });
+
+	try {
+		await auth.refreshToken();
+		log(ext.out, `[BoxClient] Token refreshed for "${alias}".`);
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		log(ext.out, `[BoxClient] Token refresh failed for "${alias}": ${message}`);
+		return undefined;
+	}
+
+	const client = new BoxClient({ auth });
+
+	// Verify the token belongs to the expected connection
+	try {
+		const user = await client.users.getUserMe();
+		const tokenEnterprise = user.enterprise?.id ?? '';
+		log(ext.out, `[BoxClient] Verified token for "${alias}": user=${user.login}, enterprise=${tokenEnterprise}`);
+
+		if (conn.enterpriseId && tokenEnterprise && tokenEnterprise !== conn.enterpriseId) {
+			log(ext.out, `[BoxClient] WARNING: Token enterprise "${tokenEnterprise}" does not match expected "${conn.enterpriseId}" for "${alias}".`);
+		}
+	} catch (err) {
+		const message = err instanceof Error ? err.message : String(err);
+		log(ext.out, `[BoxClient] Token verification failed for "${alias}": ${message}`);
+		return undefined;
+	}
+
+	return { client, auth };
+}
