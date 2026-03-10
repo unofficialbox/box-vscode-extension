@@ -9,3 +9,7 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+
+# Include pre-built dist files for webviews (these are devDependencies)
+!node_modules/box-ui-elements/dist/**
+!node_modules/box-annotations/dist/**

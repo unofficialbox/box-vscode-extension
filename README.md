@@ -142,4 +142,4 @@ To debug: open the project in VS Code and press **F5** to launch the Extension D
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.

@@ -594,13 +594,13 @@
     "@types/vscode": "^1.109.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "box-annotations": "^5.2.1-beta.0",
+    "box-ui-elements": "^26.0.0",
     "eslint": "^9.39.2",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.54.0"
   },
   "dependencies": {
-    "box-annotations": "^5.2.1-beta.0",
-    "box-node-sdk": "^10.4.0",
-    "box-ui-elements": "^26.0.0"
+    "box-node-sdk": "^10.4.0"
   }
 }
