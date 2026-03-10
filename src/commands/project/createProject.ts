@@ -23,16 +23,16 @@ export async function createProject(): Promise<void> {
 	// Step 1 — Select template
 	const templateItems: vscode.QuickPickItem[] = [
 		{
-			label: 'Empty',
+			label: 'Minimal',
 			description: 'box-project.json  +  metadata-templates/',
 		},
 		{
-			label: 'Simple',
-			description: 'Empty  +  folders/',
+			label: 'Standard',
+			description: 'Minimal  +  folders/ and enterprise_configuration/',
 		},
 		{
 			label: 'Full',
-			description: 'Simple  +  automate/, apps/, ai_agents/, sign/, hubs/, and more',
+			description: 'Standard  +  automate/, apps/, ai_agents/, sign/, hubs/, and more',
 		},
 	];
 

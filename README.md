@@ -7,8 +7,8 @@ A VS Code extension for the [Box Platform](https://www.box.com/platform) that br
 ### Project Scaffolding
 
 - **Create Box Project** — Scaffold a new Box project in your workspace with one of three templates:
-  - **Empty** — `metadata-templates/` directory only
-  - **Simple** — Adds a `folders/` directory
+  - **Minimal** — `metadata-templates/` and `metadata-taxonomies` directories
+  - **Standard** — Adds a `folders/` directory
   - **Full** — Adds `automate/`, `apps/`, `ai_agents/`, `sign/`, `hubs/`, `enterprise_configuration/`, `dev_app_configurations/`, `shield/`, and more
 - Generates a `box-project.json` file that activates the extension automatically
 

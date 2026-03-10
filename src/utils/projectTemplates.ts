@@ -1,6 +1,6 @@
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type ProjectTemplate = 'Empty' | 'Simple' | 'Full';
+export type ProjectTemplate = 'Minimal' | 'Standard' | 'Full';
 
 export interface BoxProject {
 	name: string;
@@ -12,15 +12,20 @@ export interface BoxProject {
 // ─── Template directory definitions ───────────────────────────────────────────
 
 export const TEMPLATE_DIRS: Record<ProjectTemplate, string[]> = {
-	'Empty': [
+	'Minimal': [
 		'metadata-templates',
+		'metadata-taxonomies',
 	],
-	'Simple': [
+	'Standard': [
 		'metadata-templates',
+		'metadata-taxonomies',
 		'folders',
+		'enterprise_configuration',
+
 	],
 	'Full': [
 		'metadata-templates',
+		'metadata-taxonomies',	
 		'folders',
 		'automate',
 		'automate/extract',
