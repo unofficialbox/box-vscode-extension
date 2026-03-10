@@ -25,6 +25,7 @@ export function activate(context: vscode.ExtensionContext): void {
 	watcher.onDidDelete(() => void updateProjectContext());
 	context.subscriptions.push(watcher);
 
+
 	// Register all commands
 	context.subscriptions.push(...registerCommands());
 

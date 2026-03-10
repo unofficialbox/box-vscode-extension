@@ -48,10 +48,6 @@
         "title": "Box: Get Access Token"
       },
       {
-        "command": "box-vscode-extension.createDevApp",
-        "title": "Box: Create Box Developer Application"
-      },
-      {
         "command": "box-vscode-extension.refreshAllFiles",
         "title": "Refresh",
         "icon": "$(refresh)"
@@ -561,26 +557,28 @@
         "contents": "No UI elements to display."
       }
     ],
-    "configuration": {
-      "title": "Box",
-      "properties": {
-        "box.clientId": {
-          "type": "string",
-          "default": "",
-          "description": "Box application Client ID (from the Box Developer Console)"
-        },
-        "box.clientSecret": {
-          "type": "string",
-          "default": "",
-          "description": "Box application Client Secret (from the Box Developer Console)"
-        },
-        "box.callbackUrl": {
-          "type": "string",
-          "default": "http://localhost:3000/callback",
-          "description": "Full OAuth 2.0 redirect URI. Must match the redirect URI registered in your Box app."
+    "configuration": [
+      {
+        "title": "Box",
+        "properties": {
+          "box.clientId": {
+            "type": "string",
+            "default": "",
+            "description": "Box application Client ID (from the Box Developer Console)"
+          },
+          "box.clientSecret": {
+            "type": "string",
+            "default": "",
+            "description": "Box application Client Secret (from the Box Developer Console)"
+          },
+          "box.callbackUrl": {
+            "type": "string",
+            "default": "http://localhost:3000/callback",
+            "description": "Full OAuth 2.0 redirect URI. Must match the redirect URI registered in your Box app."
+          }
         }
       }
-    }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

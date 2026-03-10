@@ -7,7 +7,6 @@ import { displayDefaultConnection } from './connections/displayDefaultConnection
 import { setDefaultConnection }     from './connections/setDefaultConnection';
 import { removeConnection }         from './connections/removeConnection';
 import { getAccessToken }           from './connections/getAccessToken';
-import { createDevApp }             from './devApp/createDevApp';
 import { deployToCurrentEnterprise, deployToTargetEnterprise } from './deploy/deployMetadata';
 import { diffAndDeployToDefaultEnterprise, diffAndDeployToTargetEnterprise } from './deploy/diffAndDeploy';
 
@@ -22,7 +21,6 @@ export function registerCommands(): vscode.Disposable[] {
 		vscode.commands.registerCommand('box-vscode-extension.setDefaultConnection',     setDefaultConnection),
 		vscode.commands.registerCommand('box-vscode-extension.removeConnection',         removeConnection),
 		vscode.commands.registerCommand('box-vscode-extension.getAccessToken',           getAccessToken),
-		vscode.commands.registerCommand('box-vscode-extension.createDevApp',             createDevApp),
 		vscode.commands.registerCommand('box-vscode-extension.deployToCurrentEnterprise',          deployToCurrentEnterprise),
 		vscode.commands.registerCommand('box-vscode-extension.deployToTargetEnterprise',           deployToTargetEnterprise),
 		vscode.commands.registerCommand('box-vscode-extension.diffAndDeployToDefaultEnterprise',   diffAndDeployToDefaultEnterprise),
