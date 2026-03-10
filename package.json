@@ -4,7 +4,11 @@
   "description": "",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.109.0"
+    "vscode": "^1.105.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/unofficialbox/box-vscode-extension.git"
   },
   "categories": [
     "Other"
