@@ -104,11 +104,58 @@ async function handleDeploy(
 
 // ─── HTML generation ────────────────────────────────────────────────────────
 
+/**
+ * Strips noise from JSON objects before diff comparison.
+ * - Templates: removes `"hidden": false`, `"scope"`, and `"description": ""`
+ * - Taxonomies: removes `namespace` (environment-specific, not meaningful for diff)
+ */
+function normalizeDiffJson(json: unknown, type: 'template' | 'taxonomy'): unknown {
+	if (json === null || json === undefined) { return json; }
+	const obj = JSON.parse(JSON.stringify(json)); // deep clone
+
+	if (type === 'template') {
+		stripProperty(obj, 'hidden', false);
+		stripProperty(obj, 'description', '');
+		stripKey(obj, 'scope');
+	} else if (type === 'taxonomy') {
+		stripKey(obj, 'namespace');
+	}
+	return obj;
+}
+
+/** Recursively removes a key from objects and arrays when its value equals the given value. */
+function stripProperty(obj: unknown, key: string, value: unknown): void {
+	if (Array.isArray(obj)) {
+		for (const item of obj) { stripProperty(item, key, value); }
+	} else if (obj !== null && typeof obj === 'object') {
+		const record = obj as Record<string, unknown>;
+		if (key in record && record[key] === value) {
+			delete record[key];
+		}
+		for (const k of Object.keys(record)) {
+			stripProperty(record[k], key, value);
+		}
+	}
+}
+
+/** Recursively removes a key from objects and arrays regardless of value. */
+function stripKey(obj: unknown, key: string): void {
+	if (Array.isArray(obj)) {
+		for (const item of obj) { stripKey(item, key); }
+	} else if (obj !== null && typeof obj === 'object') {
+		const record = obj as Record<string, unknown>;
+		delete record[key];
+		for (const k of Object.keys(record)) {
+			stripKey(record[k], key);
+		}
+	}
+}
+
 function getWebviewHtml(items: DiffItem[], alias: string, nonce: string): string {
 	const dataJson = JSON.stringify(items.map(item => ({
 		fileName: item.fileName,
-		localStr: JSON.stringify(item.localJson, null, 2),
-		remoteStr: item.remoteJson !== null ? JSON.stringify(item.remoteJson, null, 2) : null,
+		localStr: JSON.stringify(normalizeDiffJson(item.localJson, item.type), null, 2),
+		remoteStr: item.remoteJson !== null ? JSON.stringify(normalizeDiffJson(item.remoteJson, item.type), null, 2) : null,
 		type: item.type,
 	}))).replace(/<\//g, '<\\/');
 

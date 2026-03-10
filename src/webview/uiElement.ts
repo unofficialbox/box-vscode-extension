@@ -11,18 +11,22 @@ const activePanels = new Set<vscode.WebviewPanel>();
 
 // ─── Public API ──────────────────────────────────────────────────────────────
 
-export async function openUIElement(elementType: UIElementType): Promise<void> {
-	// Determine what input we need
-	const needsFileId = elementType === 'contentPreview';
-	const prompt = needsFileId ? 'Enter Box File ID' : 'Enter Box Folder ID (use 0 for root)';
-	const placeholder = needsFileId ? 'e.g. 123456789' : 'e.g. 0';
+export async function openUIElement(elementType: UIElementType, prefilledId?: string): Promise<void> {
+	let id = prefilledId;
 
-	const id = await vscode.window.showInputBox({
-		prompt,
-		placeHolder: placeholder,
-		validateInput: (v) => /^\d+$/.test(v.trim()) ? null : 'Must be a numeric ID',
-	});
-	if (!id) { return; }
+	if (!id) {
+		// Determine what input we need
+		const needsFileId = elementType === 'contentPreview';
+		const prompt = needsFileId ? 'Enter Box File ID' : 'Enter Box Folder ID (use 0 for root)';
+		const placeholder = needsFileId ? 'e.g. 123456789' : 'e.g. 0';
+
+		id = await vscode.window.showInputBox({
+			prompt,
+			placeHolder: placeholder,
+			validateInput: (v) => /^\d+$/.test(v.trim()) ? null : 'Must be a numeric ID',
+		});
+		if (!id) { return; }
+	}
 
 	const result = await getBoxClient();
 	if (!result) {
@@ -142,10 +146,33 @@ function setupApiProxy(panel: vscode.WebviewPanel): void {
 		}
 
 		try {
+			// Reconstruct FormData from serialized entries when present
+			let fetchBody: any;
+			let fetchHeaders = { ...msg.headers };
+
+			if (msg.formData && Array.isArray(msg.formData)) {
+				const formData = new FormData();
+				for (const entry of msg.formData) {
+					if (entry.base64) {
+						const buf = Buffer.from(entry.base64, 'base64');
+						const blob = new Blob([buf], { type: entry.type || 'application/octet-stream' });
+						formData.append(entry.name, blob, entry.fileName || 'blob');
+					} else {
+						formData.append(entry.name, entry.value ?? '');
+					}
+				}
+				fetchBody = formData;
+				// Remove content-type so fetch auto-generates the multipart boundary
+				delete fetchHeaders['content-type'];
+				delete fetchHeaders['Content-Type'];
+			} else {
+				fetchBody = msg.body || undefined;
+			}
+
 			const resp = await fetch(msg.url, {
 				method: msg.method,
-				headers: msg.headers,
-				body: msg.body || undefined,
+				headers: fetchHeaders,
+				body: fetchBody,
 			});
 
 			const responseHeaders: Record<string, string> = {};

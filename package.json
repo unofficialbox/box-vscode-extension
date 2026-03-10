@@ -133,10 +133,80 @@
         "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
         "title": "Box: Diff and Deploy to Target Box Enterprise",
         "icon": "$(diff)"
+      },
+      {
+        "command": "box-vscode-extension.copyFolderId",
+        "title": "Copy Folder ID",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "box-vscode-extension.copyFileId",
+        "title": "Copy File ID",
+        "icon": "$(clippy)"
+      },
+      {
+        "command": "box-vscode-extension.showContentUploader",
+        "title": "Show Content Uploader",
+        "icon": "$(cloud-upload)"
+      },
+      {
+        "command": "box-vscode-extension.showContentPicker",
+        "title": "Show Content Picker",
+        "icon": "$(file-symlink-directory)"
+      },
+      {
+        "command": "box-vscode-extension.showContentExplorer",
+        "title": "Show Content Explorer",
+        "icon": "$(root-folder)"
+      },
+      {
+        "command": "box-vscode-extension.createFolder",
+        "title": "Create Folder",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "box-vscode-extension.refreshFolder",
+        "title": "Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "box-vscode-extension.deleteItem",
+        "title": "Delete",
+        "icon": "$(trash)"
+      },
+      {
+        "command": "box-vscode-extension.createFolderAtRoot",
+        "title": "Create Folder",
+        "icon": "$(new-folder)"
+      },
+      {
+        "command": "box-vscode-extension.filterAllFiles",
+        "title": "Filter",
+        "icon": "$(filter)"
+      },
+      {
+        "command": "box-vscode-extension.clearFilterAllFiles",
+        "title": "Clear Filter",
+        "icon": "$(clear-all)"
       }
     ],
     "menus": {
       "view/title": [
+        {
+          "command": "box-vscode-extension.filterAllFiles",
+          "when": "view == box-vscode-extension.allFilesView && !box.allFilesFiltered",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.clearFilterAllFiles",
+          "when": "view == box-vscode-extension.allFilesView && box.allFilesFiltered",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.createFolderAtRoot",
+          "when": "view == box-vscode-extension.allFilesView",
+          "group": "navigation"
+        },
         {
           "command": "box-vscode-extension.refreshAllFiles",
           "when": "view == box-vscode-extension.allFilesView",
@@ -150,9 +220,79 @@
       ],
       "view/item/context": [
         {
+          "command": "box-vscode-extension.refreshFolder",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "inline@1"
+        },
+        {
+          "command": "box-vscode-extension.createFolder",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "inline@2"
+        },
+        {
+          "command": "box-vscode-extension.copyFolderId",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "inline@3"
+        },
+        {
+          "command": "box-vscode-extension.deleteItem",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "inline@4"
+        },
+        {
+          "command": "box-vscode-extension.copyFileId",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == file",
+          "group": "inline@1"
+        },
+        {
+          "command": "box-vscode-extension.deleteItem",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == file",
+          "group": "inline@2"
+        },
+        {
           "command": "box-vscode-extension.previewFile",
           "when": "view == box-vscode-extension.allFilesView && viewItem == file",
           "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.copyFileId",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == file",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.copyFolderId",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.refreshFolder",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.createFolder",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.deleteItem",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder || view == box-vscode-extension.allFilesView && viewItem == file",
+          "group": "danger"
+        },
+        {
+          "command": "box-vscode-extension.showContentUploader",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "uielements"
+        },
+        {
+          "command": "box-vscode-extension.showContentPicker",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "uielements"
+        },
+        {
+          "command": "box-vscode-extension.showContentExplorer",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "uielements"
         },
         {
           "command": "box-vscode-extension.copyToClipboard",
@@ -333,6 +473,50 @@
         {
           "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
           "when": "project.generated && box.authenticated"
+        },
+        {
+          "command": "box-vscode-extension.copyFolderId",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.copyFileId",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showContentUploader",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showContentPicker",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showContentExplorer",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.createFolder",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.refreshFolder",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.deleteItem",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.createFolderAtRoot",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.filterAllFiles",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.clearFilterAllFiles",
+          "when": "false"
         }
       ]
     },

@@ -114,10 +114,31 @@ function setupApiProxy(webview: vscode.Webview): void {
 	messageListener = webview.onDidReceiveMessage(async (msg) => {
 		if (msg.type !== 'api-proxy') { return; }
 		try {
+			let fetchBody: any;
+			let fetchHeaders = { ...msg.headers };
+
+			if (msg.formData && Array.isArray(msg.formData)) {
+				const formData = new FormData();
+				for (const entry of msg.formData) {
+					if (entry.base64) {
+						const buf = Buffer.from(entry.base64, 'base64');
+						const blob = new Blob([buf], { type: entry.type || 'application/octet-stream' });
+						formData.append(entry.name, blob, entry.fileName || 'blob');
+					} else {
+						formData.append(entry.name, entry.value ?? '');
+					}
+				}
+				fetchBody = formData;
+				delete fetchHeaders['content-type'];
+				delete fetchHeaders['Content-Type'];
+			} else {
+				fetchBody = msg.body || undefined;
+			}
+
 			const resp = await fetch(msg.url, {
 				method: msg.method,
-				headers: msg.headers,
-				body: msg.body || undefined,
+				headers: fetchHeaders,
+				body: fetchBody,
 			});
 
 			const responseHeaders: Record<string, string> = {};

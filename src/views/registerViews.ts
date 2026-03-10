@@ -16,8 +16,19 @@ export function registerViews(): vscode.Disposable[] {
 	const configurationProvider = new ConfigurationProvider();
 	const uiElementsProvider = new UIElementsProvider();
 
+	const allFilesTreeView = vscode.window.createTreeView('box-vscode-extension.allFilesView', {
+		treeDataProvider: allFilesProvider,
+	});
+
+	// Update the tree view description when filter changes
+	allFilesProvider.onDidChangeTreeData(() => {
+		allFilesTreeView.description = allFilesProvider.filterText
+			? `Filter: "${allFilesProvider.filterText}"`
+			: undefined;
+	});
+
 	return [
-		vscode.window.registerTreeDataProvider('box-vscode-extension.allFilesView', allFilesProvider),
+		allFilesTreeView,
 		vscode.window.registerTreeDataProvider('box-vscode-extension.configurationView', configurationProvider),
 		vscode.window.registerTreeDataProvider('box-vscode-extension.uiElementsView', uiElementsProvider),
 		vscode.commands.registerCommand('box-vscode-extension.allFilesLoadMore', (item: AllFilesItem) => {
@@ -25,6 +36,19 @@ export function registerViews(): vscode.Disposable[] {
 		}),
 		vscode.commands.registerCommand('box-vscode-extension.refreshAllFiles', () => {
 			allFilesProvider.refresh();
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.filterAllFiles', async () => {
+			const text = await vscode.window.showInputBox({
+				title: 'Box: Filter All Files',
+				prompt: 'Show only files and folders containing this text',
+				placeHolder: 'Type to filter…',
+				value: allFilesProvider.filterText,
+			});
+			if (text === undefined) { return; } // cancelled
+			allFilesProvider.setFilter(text);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.clearFilterAllFiles', () => {
+			allFilesProvider.clearFilter();
 		}),
 		vscode.commands.registerCommand('box-vscode-extension.previewFile', (item: AllFilesItem) => {
 			return openContentPreview(item.itemId, item.itemName);
@@ -75,6 +99,110 @@ export function registerViews(): vscode.Disposable[] {
 		}),
 		vscode.commands.registerCommand('box-vscode-extension.openUIElement', (item: UIElementsItem) => {
 			return openUIElement(item.elementType);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.copyFolderId', async (item: AllFilesItem) => {
+			await vscode.env.clipboard.writeText(item.itemId);
+			vscode.window.showInformationMessage(`Copied Folder ID: ${item.itemId}`);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.copyFileId', async (item: AllFilesItem) => {
+			await vscode.env.clipboard.writeText(item.itemId);
+			vscode.window.showInformationMessage(`Copied File ID: ${item.itemId}`);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.showContentUploader', (item: AllFilesItem) => {
+			return openUIElement('contentUploader', item.itemId);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.showContentPicker', (item: AllFilesItem) => {
+			return openUIElement('contentPicker', item.itemId);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.showContentExplorer', (item: AllFilesItem) => {
+			return openUIElement('contentExplorer', item.itemId);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.createFolder', async (item: AllFilesItem) => {
+			const name = await vscode.window.showInputBox({
+				title: 'Box: Create Folder',
+				prompt: `Create a new folder inside "${item.itemName}"`,
+				placeHolder: 'Folder name',
+				ignoreFocusOut: true,
+				validateInput: v => (!v || !v.trim()) ? 'Folder name is required' : null,
+			});
+			if (!name) { return; }
+
+			const result = await getBoxClient();
+			if (!result) {
+				vscode.window.showErrorMessage('No Box connection available. Run "Box: Authorize Connection" first.');
+				return;
+			}
+
+			try {
+				const folder = await result.client.folders.createFolder({
+					name: name.trim(),
+					parent: { id: item.itemId },
+				});
+				vscode.window.showInformationMessage(`Folder "${folder.name}" created.`);
+				allFilesProvider.refresh();
+			} catch (err) {
+				const message = err instanceof Error ? err.message : String(err);
+				vscode.window.showErrorMessage(`Failed to create folder: ${message}`);
+			}
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.createFolderAtRoot', async () => {
+			const name = await vscode.window.showInputBox({
+				title: 'Box: Create Folder',
+				prompt: 'Create a new folder in the root directory',
+				placeHolder: 'Folder name',
+				ignoreFocusOut: true,
+				validateInput: v => (!v || !v.trim()) ? 'Folder name is required' : null,
+			});
+			if (!name) { return; }
+
+			const result = await getBoxClient();
+			if (!result) {
+				vscode.window.showErrorMessage('No Box connection available. Run "Box: Authorize Connection" first.');
+				return;
+			}
+
+			try {
+				const folder = await result.client.folders.createFolder({
+					name: name.trim(),
+					parent: { id: '0' },
+				});
+				vscode.window.showInformationMessage(`Folder "${folder.name}" created.`);
+				allFilesProvider.refresh();
+			} catch (err) {
+				const message = err instanceof Error ? err.message : String(err);
+				vscode.window.showErrorMessage(`Failed to create folder: ${message}`);
+			}
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.refreshFolder', (item: AllFilesItem) => {
+			allFilesProvider.refreshFolder(item.itemId);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.deleteItem', async (item: AllFilesItem) => {
+			const typeLabel = item.itemType === 'folder' ? 'folder' : 'file';
+			const confirm = await vscode.window.showWarningMessage(
+				`Are you sure you want to delete the ${typeLabel} "${item.itemName}"?`,
+				{ modal: true },
+				'Delete',
+			);
+			if (confirm !== 'Delete') { return; }
+
+			const result = await getBoxClient();
+			if (!result) {
+				vscode.window.showErrorMessage('No Box connection available. Run "Box: Authorize Connection" first.');
+				return;
+			}
+
+			try {
+				if (item.itemType === 'folder') {
+					await result.client.folders.deleteFolderById(item.itemId, { queryParams: { recursive: true } });
+				} else {
+					await result.client.files.deleteFileById(item.itemId);
+				}
+				vscode.window.showInformationMessage(`${typeLabel.charAt(0).toUpperCase() + typeLabel.slice(1)} "${item.itemName}" deleted.`);
+				allFilesProvider.refresh();
+			} catch (err) {
+				const message = err instanceof Error ? err.message : String(err);
+				vscode.window.showErrorMessage(`Failed to delete ${typeLabel}: ${message}`);
+			}
 		}),
 		vscode.commands.registerCommand('box-vscode-extension.openMetadataQueryBuilder', () => {
 			return openMetadataQueryBuilder();

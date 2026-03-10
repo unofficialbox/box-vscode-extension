@@ -14,15 +14,18 @@ export class AllFilesItem extends vscode.TreeItem {
 		public readonly itemType: ItemType,
 		public readonly parentFolderId?: string,
 		public readonly nextMarker?: string,
+		collapsibleOverride?: vscode.TreeItemCollapsibleState,
 	) {
 		const isFolder = itemType === 'folder';
 		const isLoadMore = itemType === 'load_more';
 
 		super(
 			itemName,
-			isFolder
-				? vscode.TreeItemCollapsibleState.Collapsed
-				: vscode.TreeItemCollapsibleState.None,
+			collapsibleOverride !== undefined
+				? collapsibleOverride
+				: isFolder
+					? vscode.TreeItemCollapsibleState.Collapsed
+					: vscode.TreeItemCollapsibleState.None,
 		);
 
 		if (isLoadMore) {
@@ -58,8 +61,28 @@ export class AllFilesProvider implements vscode.TreeDataProvider<AllFilesItem> {
 	/** Cached children per folder id (includes the "Load More" item if applicable). */
 	private cache = new Map<string, AllFilesItem[]>();
 
+	/** Active filter text (empty = no filter). */
+	private _filterText = '';
+
+	get filterText(): string { return this._filterText; }
+
+	setFilter(text: string): void {
+		this._filterText = text.toLowerCase();
+		vscode.commands.executeCommand('setContext', 'box.allFilesFiltered', !!this._filterText);
+		this._onDidChangeTreeData.fire();
+	}
+
+	clearFilter(): void {
+		this.setFilter('');
+	}
+
 	refresh(): void {
 		this.cache.clear();
+		this._onDidChangeTreeData.fire();
+	}
+
+	refreshFolder(folderId: string): void {
+		this.cache.delete(folderId);
 		this._onDidChangeTreeData.fire();
 	}
 
@@ -74,10 +97,53 @@ export class AllFilesProvider implements vscode.TreeDataProvider<AllFilesItem> {
 
 		const folderId = element?.itemId ?? '0';
 
+		let items: AllFilesItem[];
 		const cached = this.cache.get(folderId);
-		if (cached) { return cached; }
+		items = cached ?? await this.fetchPage(folderId);
 
-		return this.fetchPage(folderId);
+		if (!this._filterText) { return items; }
+
+		return this.applyFilter(items);
+	}
+
+	/**
+	 * Filters items: keeps files/folders whose name matches the filter text,
+	 * and folders that contain matching descendants (shown expanded).
+	 */
+	private applyFilter(items: AllFilesItem[]): AllFilesItem[] {
+		const filtered: AllFilesItem[] = [];
+		for (const item of items) {
+			if (item.itemType === 'load_more') { continue; }
+
+			const nameMatches = item.itemName.toLowerCase().includes(this._filterText);
+
+			if (item.itemType === 'folder') {
+				// Check if this folder or any cached descendant matches
+				if (nameMatches || this.hasMatchingDescendant(item.itemId)) {
+					// Show folder expanded so user can see matching children
+					filtered.push(new AllFilesItem(
+						item.itemId, item.itemName, item.itemType,
+						item.parentFolderId, item.nextMarker,
+						vscode.TreeItemCollapsibleState.Expanded,
+					));
+				}
+			} else if (nameMatches) {
+				filtered.push(item);
+			}
+		}
+		return filtered;
+	}
+
+	/** Recursively checks if any cached descendant of a folder matches the filter. */
+	private hasMatchingDescendant(folderId: string): boolean {
+		const children = this.cache.get(folderId);
+		if (!children) { return false; }
+		for (const child of children) {
+			if (child.itemType === 'load_more') { continue; }
+			if (child.itemName.toLowerCase().includes(this._filterText)) { return true; }
+			if (child.itemType === 'folder' && this.hasMatchingDescendant(child.itemId)) { return true; }
+		}
+		return false;
 	}
 
 	/** Fetches a page of items for `folderId` and stores them in the cache. */
@@ -108,11 +174,24 @@ export class AllFilesProvider implements vscode.TreeDataProvider<AllFilesItem> {
 				return a.itemName.localeCompare(b.itemName);
 			});
 
-			// Append to any existing cached items (for "Load More" pagination)
-			const existing = this.cache.get(folderId) ?? [];
-			// Remove previous "Load More" item if present
-			const withoutLoadMore = existing.filter(i => i.itemType !== 'load_more');
-			const merged = [...withoutLoadMore, ...items];
+			// For "Load More" pagination, append to existing cached items.
+			// For initial loads (no marker), replace to avoid duplicates from concurrent calls.
+			let merged: AllFilesItem[];
+			if (marker) {
+				const existing = this.cache.get(folderId) ?? [];
+				const withoutLoadMore = existing.filter(i => i.itemType !== 'load_more');
+				merged = [...withoutLoadMore, ...items];
+			} else {
+				merged = items;
+			}
+
+			// Deduplicate by item ID (keeps first occurrence)
+			const seen = new Set<string>();
+			merged = merged.filter(i => {
+				if (seen.has(i.itemId)) { return false; }
+				seen.add(i.itemId);
+				return true;
+			});
 
 			// Add "Load More" if there are more pages
 			if (response.nextMarker) {

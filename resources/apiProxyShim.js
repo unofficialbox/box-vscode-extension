@@ -34,6 +34,27 @@
 	 */
 	function sendProxyRequest(method, url, headers, body) {
 		var id = nextId++;
+
+		// FormData cannot be cloned via postMessage. Convert it to a
+		// serializable representation so the extension host can rebuild
+		// the multipart request using Node's built-in fetch().
+		if (body && typeof FormData !== 'undefined' && body instanceof FormData) {
+			return serializeFormData(body).then(function (result) {
+				return new Promise(function (resolve) {
+					pending[id] = resolve;
+					vscode.postMessage({
+						type: 'api-proxy',
+						id: id,
+						method: method,
+						url: url,
+						headers: headers,
+						formData: result, // Array of { name, value?, fileName?, base64?, type? }
+						body: null,
+					});
+				});
+			});
+		}
+
 		return new Promise(function (resolve) {
 			pending[id] = resolve;
 			vscode.postMessage({
@@ -44,6 +65,44 @@
 				headers: headers,
 				body: body || null,
 			});
+		});
+	}
+
+	/**
+	 * Serializes a FormData into a cloneable array of entries.
+	 * File/Blob values are read as base64 strings.
+	 */
+	function serializeFormData(fd) {
+		var entries = [];
+		var promises = [];
+		fd.forEach(function (value, name) {
+			if (value instanceof Blob) {
+				var p = readBlobAsBase64(value).then(function (base64) {
+					entries.push({
+						name: name,
+						base64: base64,
+						fileName: value.name || 'blob',
+						type: value.type || 'application/octet-stream',
+					});
+				});
+				promises.push(p);
+			} else {
+				entries.push({ name: name, value: String(value) });
+			}
+		});
+		return Promise.all(promises).then(function () { return entries; });
+	}
+
+	function readBlobAsBase64(blob) {
+		return new Promise(function (resolve) {
+			var reader = new FileReader();
+			reader.onloadend = function () {
+				// result is "data:<type>;base64,<data>"
+				var result = reader.result || '';
+				var idx = result.indexOf(',');
+				resolve(idx >= 0 ? result.substring(idx + 1) : result);
+			};
+			reader.readAsDataURL(blob);
 		});
 	}
 
