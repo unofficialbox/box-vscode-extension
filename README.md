@@ -84,11 +84,6 @@ All credentials are stored securely using VS Code's encrypted secret storage.
 - Copy request JSON to clipboard
 - Paginated results with "Next Page" support
 
-### Developer App Creation
-
-- **Create Box Developer Application** — Create a new Box developer application by providing just an app name
-- Uses the default connection to call the Box API and returns the new app's ID and client ID
-
 ## Requirements
 
 - [Node.js](https://nodejs.org/) 18+
