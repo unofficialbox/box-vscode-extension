@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { log, logCommandHeader } from '../../utils/output';
 import { getConnectionAliases, getConnection } from '../../utils/connectionStorage';
+import { clearBoxClientCache } from '../../utils/boxClient';
 import { updateStatusBar } from '../../statusBar/boxStatusBar';
 
 export async function setDefaultConnection(): Promise<void> {
@@ -31,6 +32,7 @@ export async function setDefaultConnection(): Promise<void> {
 	if (!selected) { return; }
 
 	await ext.context.globalState.update('box.defaultConnection', selected.label);
+	clearBoxClientCache();
 	await updateStatusBar(selected.label);
 
 	logCommandHeader(ext.out, 'Box: Set the Default Box Connection');

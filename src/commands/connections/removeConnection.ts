@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { ext } from '../../extensionVariables';
 import { log, logCommandHeader } from '../../utils/output';
 import { getConnectionAliases, getConnection, deleteConnection } from '../../utils/connectionStorage';
+import { clearBoxClientCache } from '../../utils/boxClient';
 import { updateAuthContext } from '../../utils/contextKeys';
 
 export async function removeConnection(): Promise<void> {
@@ -38,6 +39,7 @@ export async function removeConnection(): Promise<void> {
 	if (confirm !== 'Remove') { return; }
 
 	await deleteConnection(selected.label);
+	clearBoxClientCache();
 	await updateAuthContext();
 
 	logCommandHeader(ext.out, 'Box: Remove Box Connection');

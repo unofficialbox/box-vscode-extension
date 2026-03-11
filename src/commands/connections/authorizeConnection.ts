@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import * as vscode from 'vscode';
 import { BoxClient, BoxOAuth, OAuthConfig } from 'box-node-sdk';
 import { ext } from '../../extensionVariables';
@@ -77,9 +78,10 @@ export async function authorizeConnection(): Promise<void> {
 	const clientSecret = clientSecretInput.trim();
 	const callbackUrl  = callbackUrlInput.trim();
 
+	const oauthState  = crypto.randomBytes(16).toString('hex');
 	const oauthConfig = new OAuthConfig({ clientId, clientSecret });
 	const auth        = new BoxOAuth({ config: oauthConfig });
-	const authUrl     = auth.getAuthorizeUrl({ redirectUri: callbackUrl });
+	const authUrl     = auth.getAuthorizeUrl({ redirectUri: callbackUrl, state: oauthState });
 
 	logCommandHeader(ext.out, 'Box: Authorize Connection');
 	log(ext.out, `Alias:        ${alias}`);
@@ -90,7 +92,7 @@ export async function authorizeConnection(): Promise<void> {
 	ext.out.show(true);
 
 	try {
-		const result = await waitForOAuthCallback(callbackUrl, authUrl);
+		const result = await waitForOAuthCallback(callbackUrl, authUrl, oauthState);
 
 		let connection: BoxConnection;
 		try {

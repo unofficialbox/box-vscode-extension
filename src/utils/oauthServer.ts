@@ -41,7 +41,7 @@ export interface CallbackUserInfo {
  *
  * Any previously-running server is closed before the new one is started.
  */
-export function waitForOAuthCallback(callbackUrl: string, authUrl: string): Promise<OAuthCallbackResult> {
+export function waitForOAuthCallback(callbackUrl: string, authUrl: string, expectedState?: string): Promise<OAuthCallbackResult> {
 	return new Promise<OAuthCallbackResult>((resolve, reject) => {
 		const parsedUrl    = new URL(callbackUrl);
 		const callbackPort = parseInt(
@@ -79,8 +79,21 @@ export function waitForOAuthCallback(callbackUrl: string, authUrl: string): Prom
 			}
 
 			const code             = reqUrl.searchParams.get('code');
+			const state            = reqUrl.searchParams.get('state');
 			const error            = reqUrl.searchParams.get('error');
 			const errorDescription = reqUrl.searchParams.get('error_description');
+
+			// Validate CSRF state parameter
+			if (expectedState && state !== expectedState) {
+				res.writeHead(200, { 'Content-Type': 'text/html' });
+				res.end(getCallbackHtml(false, 'Invalid OAuth state parameter. This may be a CSRF attack.'));
+				clearTimeout(oauthTimeout);
+				shutdownServer();
+				const errMsg = 'OAuth state mismatch — possible CSRF attack';
+				log(ext.out, `Authorization failed: ${errMsg}`);
+				reject(new Error(errMsg));
+				return;
+			}
 
 			// OAuth error — render immediately
 			if (error || !code) {

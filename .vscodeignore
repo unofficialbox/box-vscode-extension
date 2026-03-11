@@ -1,8 +1,11 @@
 .vscode/**
 .vscode-test/**
 src/**
+out/test/**
 .gitignore
 .yarnrc
+.claude/**
+CLAUDE.md
 vsc-extension-quickstart.md
 **/tsconfig.json
 **/eslint.config.mjs

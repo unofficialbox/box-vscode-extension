@@ -28,12 +28,6 @@ export function openMetadataQueryBuilder(): void {
 
 	const panel = currentPanel;
 
-	panel.onDidDispose(() => {
-		if (currentPanel === panel) {
-			currentPanel = undefined;
-		}
-	});
-
 	const listener = panel.webview.onDidReceiveMessage(async (msg) => {
 		if (msg.type === 'execute') {
 			log(ext.out, `[MetadataQuery] Received execute message: ${JSON.stringify(msg)}`);
@@ -50,6 +44,9 @@ export function openMetadataQueryBuilder(): void {
 
 	panel.onDidDispose(() => {
 		listener.dispose();
+		if (currentPanel === panel) {
+			currentPanel = undefined;
+		}
 	});
 
 	const nonce = crypto.randomBytes(16).toString('hex');
@@ -146,18 +143,22 @@ async function handleExecute(msg: {
 
 		log(ext.out, `[MetadataQuery] Query executed: ${results.entries?.length ?? 0} results returned.`);
 
-		// Use the full (non-downscoped) token for the UI Element tab.
-		// The metadata view requires full token scopes — downscoped tokens
-		// return 400 invalid_token errors for metadata queries.
-		const alias = ext.context.globalState.get<string>('box.defaultConnection', '');
-		const conn = alias ? await getConnection(alias) : undefined;
-		const fullAccessToken = conn?.accessToken ?? '';
+		// Downscope token for the Content Explorer UI Element tab
+		let downscopedToken = '';
+		try {
+			const resource = `https://api.box.com/2.0/folders/${msg.ancestorFolderId}`;
+			const scopes = ['base_explorer', 'item_preview', 'item_download', 'root_readwrite'];
+			const tokenInfo = await result.auth.downscopeToken(scopes, resource);
+			downscopedToken = tokenInfo.accessToken ?? '';
+		} catch (err) {
+			log(ext.out, `[MetadataQuery] Token downscope failed: ${err instanceof Error ? err.message : String(err)}`);
+		}
 
 		panel.webview.postMessage({
 			type: 'results',
 			data: results,
 			nextMarker: results.nextMarker ?? '',
-			accessToken: fullAccessToken,
+			accessToken: downscopedToken,
 			ancestorFolderId: msg.ancestorFolderId,
 			from: msg.from,
 			query: msg.query,
@@ -182,7 +183,7 @@ async function handleExecute(msg: {
 async function handleApiProxy(msg: { id: string; url: string; method: string; headers: Record<string, string>; body?: string }, panel: vscode.WebviewPanel): Promise<void> {
 	try {
 		if (msg.url.includes('metadata_queries')) {
-			log(ext.out, `[MetadataQuery] API Proxy — ${msg.method} ${msg.url} body: ${msg.body}`);
+			log(ext.out, `[MetadataQuery] API Proxy — ${msg.method} ${msg.url}`);
 		}
 		const resp = await fetch(msg.url, {
 			method: msg.method,

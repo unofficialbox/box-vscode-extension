@@ -272,7 +272,7 @@
         },
         {
           "command": "box-vscode-extension.deleteItem",
-          "when": "view == box-vscode-extension.allFilesView && viewItem == folder || view == box-vscode-extension.allFilesView && viewItem == file",
+          "when": "view == box-vscode-extension.allFilesView && viewItem =~ /^(folder|file)$/",
           "group": "danger"
         },
         {
