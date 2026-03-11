@@ -180,35 +180,24 @@ Build and execute metadata queries with an interactive form — no API calls nee
 - Copy request JSON to clipboard
 - Paginated results with "Next Page" support
 
-### Box UI Elements
+### Developer App Creation
 
-Open interactive Box UI Elements directly within VS Code webview panels:
+- **Create Box Developer Application** — Create a new Box developer application by providing just an app name
+- Uses the default connection to call the Box API and returns the new app's ID and client ID
 
-| UI Element           | Description |
-| -------------------- | ----------- |
-| **Content Explorer**  | Browse and manage files with a full Box UI |
-| **Content Uploader**  | Upload files to a specific Box folder |
-| **Content Picker**    | Select files or folders with a picker interface |
-| **Content Preview**   | Preview a specific file by ID |
+## Requirements
 
-### Connection Management
+- [Node.js](https://nodejs.org/) 18+
+- A Box account with a configured OAuth 2.0 application in the [Box Developer Console](https://app.box.com/developers/console)
+- The OAuth 2.0 redirect URI in your Box app must match the extension's callback URL (default: `http://localhost:3000/callback`)
 
-Manage multiple Box connections with ease. Click the status bar to access a quick menu.
+## Extension Settings
 
-<p align="center">
-  <img src="resources/readme/connection-management.gif" alt="Connection management" />
-</p>
+This extension contributes the following settings:
 
-<!-- 🎬 TODO: Record GIF clicking the status bar connection item, showing the quick menu with connection details and actions like switching default, getting access token, and removing a connection. -->
-
-- Authorize multiple Box accounts with unique aliases
-- Switch the default connection from the status bar
-- View connection details (user name, enterprise ID)
-- Retrieve access tokens for API testing
-- Remove connections with confirmation
-- All credentials stored securely using VS Code's encrypted secret storage
-
----
+- `box.clientId` — Box application Client ID (from the Box Developer Console)
+- `box.clientSecret` — Box application Client Secret (from the Box Developer Console)
+- `box.callbackUrl` — Full OAuth 2.0 redirect URI; must match the redirect URI registered in your Box app (default: `http://localhost:3000/callback`)
 
 ## Commands
 
