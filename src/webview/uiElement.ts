@@ -358,7 +358,7 @@ function getElementAssets(
 	annotationsDir: vscode.Uri,
 	resourcesDir: vscode.Uri,
 ): ElementAssets {
-	const logoUrl = webview.asWebviewUri(vscode.Uri.joinPath(resourcesDir, 'box_app_icon.png'));
+	const logoUrl = webview.asWebviewUri(vscode.Uri.joinPath(resourcesDir, 'boxAppIcon.png'));
 	switch (type) {
 		case 'contentUploader': {
 			return {

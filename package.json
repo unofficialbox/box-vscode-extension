@@ -1,8 +1,15 @@
 {
   "name": "box-vscode-extension",
-  "displayName": "box-vscode-extension",
-  "description": "",
+  "displayName": "Box",
+  "description": "Box developer tools to accelerate the creation of Box developer applications and solutions.",
   "version": "0.0.1",
+  "publisher":"box",
+  "homepage": "https://github.com/unofficialbox/box-vscode-extension",
+  "icon":"resources/extensionIcon.png",
+  "galleryBanner": {
+        "color": "#4E4E4E",
+        "theme": "dark"
+    },
   "engines": {
     "vscode": "^1.105.0"
   },
@@ -10,8 +17,24 @@
     "type": "git",
     "url": "https://github.com/unofficialbox/box-vscode-extension.git"
   },
+  "bugs": {
+      "url": "https://github.com/unofficialbox/box-vscode-extension/issues"
+  },
+  "qna": "https://github.com/unofficialbox/box-vscode-extension/discussions/categories/q-a",
   "categories": [
-    "Other"
+    "Testing",
+    "Visualization",
+    "Other",
+    "Snippets"
+  ],
+  "keywords": [
+    "box",
+    "vscode",
+    "content",
+    "ecm",
+    "ai",
+    "agents",
+    "cloud"
   ],
   "activationEvents": [
     "workspaceContains:box-project.json"
@@ -525,7 +548,7 @@
         {
           "id": "box-explorer",
           "title": "Box",
-          "icon": "resources/box.png"
+          "icon": "resources/activityBarIcon.png"
         }
       ]
     },
@@ -595,7 +618,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "@types/vscode": "^1.109.0",
+    "@types/vscode": "^1.105.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
     "box-annotations": "^5.2.1-beta.0",
