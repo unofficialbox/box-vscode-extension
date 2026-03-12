@@ -30,8 +30,8 @@ export async function openContentPreview(fileId: string, fileName: string): Prom
 
 	// 2. Resolve local resource directories
 	const extensionUri = ext.context.extensionUri;
-	const elementsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-ui-elements', 'dist');
-	const annotationsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-annotations', 'dist');
+	const elementsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-ui-elements');
+	const annotationsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-annotations');
 
 	const resourcesDir = vscode.Uri.joinPath(extensionUri, 'resources');
 

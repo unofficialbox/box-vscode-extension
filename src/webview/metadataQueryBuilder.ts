@@ -12,7 +12,7 @@ let currentPanel: vscode.WebviewPanel | undefined;
 
 export function openMetadataQueryBuilder(): void {
 	const extensionUri = ext.context.extensionUri;
-	const elementsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-ui-elements', 'dist');
+	const elementsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-ui-elements');
 	const resourcesDir = vscode.Uri.joinPath(extensionUri, 'resources');
 
 	currentPanel = vscode.window.createWebviewPanel(

@@ -47,8 +47,8 @@ export async function openUIElement(elementType: UIElementType, prefilledId?: st
 
 	const title = getTitle(elementType, id.trim());
 	const extensionUri = ext.context.extensionUri;
-	const elementsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-ui-elements', 'dist');
-	const annotationsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-annotations', 'dist');
+	const elementsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-ui-elements');
+	const annotationsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-annotations');
 	const resourcesDir = vscode.Uri.joinPath(extensionUri, 'resources');
 
 	const panel = createPanel(title, [elementsDir, annotationsDir, resourcesDir]);
@@ -227,8 +227,8 @@ function getWebviewHtml(
 	webview: vscode.Webview,
 	extensionUri: vscode.Uri,
 ): string {
-	const elementsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-ui-elements', 'dist');
-	const annotationsDir = vscode.Uri.joinPath(extensionUri, 'node_modules', 'box-annotations', 'dist');
+	const elementsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-ui-elements');
+	const annotationsDir = vscode.Uri.joinPath(extensionUri, 'resources', 'webview-dist', 'box-annotations');
 	const resourcesDir = vscode.Uri.joinPath(extensionUri, 'resources');
 	const shimJs = webview.asWebviewUri(vscode.Uri.joinPath(resourcesDir, 'apiProxyShim.js'));
 	const cspSource = webview.cspSource;

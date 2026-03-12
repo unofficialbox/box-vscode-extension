@@ -1,6 +1,7 @@
 out
 dist
 node_modules
+resources/webview-dist
 .vscode-test/
 *.vsix
 .DS_Store

@@ -13,6 +13,9 @@ vsc-extension-quickstart.md
 **/*.ts
 **/.vscode-test.*
 
-# Include pre-built dist files for webviews (these are devDependencies)
-!node_modules/box-ui-elements/dist/**
-!node_modules/box-annotations/dist/**
+# Exclude README demo GIFs (hosted via GitHub raw URLs)
+resources/readme/**
+
+# Exclude unnecessary box-node-sdk build artifacts
+node_modules/box-node-sdk/lib-esm/**
+node_modules/box-node-sdk/src/**

@@ -602,7 +602,8 @@
     "configuration": []
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run copy-webview-deps",
+    "copy-webview-deps": "mkdir -p resources/webview-dist/box-ui-elements resources/webview-dist/box-annotations && cp node_modules/box-ui-elements/dist/explorer.js node_modules/box-ui-elements/dist/explorer.css node_modules/box-ui-elements/dist/preview.js node_modules/box-ui-elements/dist/preview.css node_modules/box-ui-elements/dist/picker.js node_modules/box-ui-elements/dist/picker.css node_modules/box-ui-elements/dist/uploader.js node_modules/box-ui-elements/dist/uploader.css node_modules/box-ui-elements/dist/sidebar.css resources/webview-dist/box-ui-elements/ && cp node_modules/box-annotations/dist/annotations.js node_modules/box-annotations/dist/annotations.css resources/webview-dist/box-annotations/",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
