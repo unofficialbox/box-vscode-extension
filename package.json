@@ -1,15 +1,15 @@
 {
-  "name": "box-vscode-extension",
-  "displayName": "Box",
+  "name": "box-for-vscode",
+  "displayName": "Box for VS Code",
   "description": "Box developer tools to accelerate the creation of Box developer applications and solutions.",
   "version": "0.0.1",
-  "publisher":"box",
+  "publisher": "box",
   "homepage": "https://github.com/unofficialbox/box-vscode-extension",
-  "icon":"resources/extensionIcon.png",
+  "icon": "resources/extensionIcon.png",
   "galleryBanner": {
-        "color": "#4E4E4E",
-        "theme": "dark"
-    },
+    "color": "#4E4E4E",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.105.0"
   },
@@ -18,7 +18,7 @@
     "url": "https://github.com/unofficialbox/box-vscode-extension.git"
   },
   "bugs": {
-      "url": "https://github.com/unofficialbox/box-vscode-extension/issues"
+    "url": "https://github.com/unofficialbox/box-vscode-extension/issues"
   },
   "qna": "https://github.com/unofficialbox/box-vscode-extension/discussions/categories/q-a",
   "categories": [
@@ -597,6 +597,59 @@
       {
         "view": "box-vscode-extension.uiElementsView",
         "contents": "No UI elements to display."
+      }
+    ],
+    "walkthroughs": [
+      {
+        "id": "box-getting-started",
+        "title": "Get started with Box for VS Code",
+        "description": "Set up and explore Box for Visual Studio Code.",
+        "steps": [
+          {
+            "id": "createProject",
+            "title": "Create a Box Project",
+            "description": "Scaffold a new workspace with a ``box-project.json`` file that activates the extension.\n\nChoose **Blank** for just the config file, or **Standard** for a full project structure with folders for metadata templates, taxonomies, and more.\n\n[Create Box Project](command:box-vscode-extension.createProject)",
+            "media": {
+              "image": "resources/readme/create-project.gif",
+              "altText": "Creating a Box project from the Command Palette"
+            },
+            "completionEvents": [
+              "onCommand:box-vscode-extension.createProject"
+            ]
+          },
+          {
+            "id": "createBoxApp",
+            "title": "Set Up a Box OAuth App",
+            "description": "Before authorizing, you need an OAuth 2.0 Custom App in the Box Developer Console.\n\n1. Go to the [Box Developer Console](https://app.box.com/developers/console)\n2. Click **Create New App** and select **Custom App**\n3. Choose **User Authentication (OAuth 2.0)**\n4. Under **Configuration**, set the redirect URI to:\n\n``http://localhost:3000/callback``\n\n5. Note your **Client ID** and **Client Secret**",
+            "media": {
+              "markdown": "resources/walkthrough/createBoxApp.md"
+            }
+          },
+          {
+            "id": "authorizeConnection",
+            "title": "Authorize a Connection",
+            "description": "Connect the extension to your Box account via OAuth 2.0.\n\nThe wizard will ask for a connection alias, your Client ID, Client Secret, and callback URL, then open a browser to complete the flow.\n\n[Authorize Connection](command:box-vscode-extension.authorize)",
+            "media": {
+              "image": "resources/readme/authorize-connection.gif",
+              "altText": "Authorizing a Box connection via the OAuth wizard"
+            },
+            "completionEvents": [
+              "onCommand:box-vscode-extension.authorize"
+            ]
+          },
+          {
+            "id": "browseFiles",
+            "title": "Browse Files and Folders",
+            "description": "Click the **Box** icon in the Activity Bar to open the sidebar. The **All Files** view displays your Box file tree with lazy loading and pagination.\n\nFrom the tree view you can create folders, delete items, copy IDs, filter by name, and refresh.\n\n[Open Box Sidebar](command:workbench.view.extension.box-explorer)",
+            "media": {
+              "image": "resources/readme/browse-files.gif",
+              "altText": "Browsing files and folders in the Box sidebar"
+            },
+            "completionEvents": [
+              "onView:box-vscode-extension.allFilesView"
+            ]
+          }
+        ]
       }
     ],
     "configuration": []
