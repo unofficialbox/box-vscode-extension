@@ -23,16 +23,12 @@ export async function createProject(): Promise<void> {
 	// Step 1 — Select template
 	const templateItems: vscode.QuickPickItem[] = [
 		{
-			label: 'Minimal',
-			description: 'box-project.json  +  metadata-templates/',
+			label: 'Blank',
+			description: 'box-project.json only',
 		},
 		{
 			label: 'Standard',
-			description: 'Minimal  +  folders/ and enterprise_configuration/',
-		},
-		{
-			label: 'Full',
-			description: 'Standard  +  automate/, apps/, ai_agents/, sign/, hubs/, and more',
+			description: 'box-project.json  +  enterprise_configuration/, folders/, metadata-taxonomies/, metadata-templates/',
 		},
 	];
 
@@ -79,9 +75,12 @@ export async function createProject(): Promise<void> {
 	logCommandHeader(ext.out, 'Box: Create Box Project');
 	log(ext.out, `Project name: ${project.name}`);
 	log(ext.out, `Template:     ${template}`);
-	log(ext.out, 'Directories created:');
-	for (const dir of TEMPLATE_DIRS[template]) {
-		log(ext.out, `  ├─ ${dir}/`);
+	const dirs = TEMPLATE_DIRS[template];
+	if (dirs.length > 0) {
+		log(ext.out, 'Directories created:');
+		for (const dir of dirs) {
+			log(ext.out, `  ├─ ${dir}/`);
+		}
 	}
 	ext.out.show(true);
 

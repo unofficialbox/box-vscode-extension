@@ -9,9 +9,12 @@ import { MetadataTaxonomyNode } from 'box-node-sdk/lib/schemas/metadataTaxonomyN
 
 // ─── Item types ──────────────────────────────────────────────────────────────
 
-type ConfigItemType = 'category' | 'subcategory' | 'template' | 'taxonomy' | 'taxonomyNode';
+type ConfigItemType = 'category' | 'subcategory' | 'template' | 'taxonomy' | 'taxonomyNode' | 'enterpriseConfigCategory';
 
 export class ConfigurationItem extends vscode.TreeItem {
+	/** For enterpriseConfigCategory items, the API category key. */
+	public readonly enterpriseConfigCategoryKey?: string;
+
 	constructor(
 		public readonly itemType: ConfigItemType,
 		label: string,
@@ -27,6 +30,14 @@ export class ConfigurationItem extends vscode.TreeItem {
 		if (itemType === 'category' && label === 'Metadata Taxonomies') {
 			this.iconPath = new vscode.ThemeIcon('symbol-class');
 			this.contextValue = 'categoryTaxonomies';
+		} else if (itemType === 'category' && label === 'Enterprise Configuration') {
+			this.iconPath = new vscode.ThemeIcon('settings-gear');
+			this.contextValue = 'categoryEnterpriseConfig';
+			this.command = {
+				command: 'box-vscode-extension.showEnterpriseConfiguration',
+				title: 'Show Enterprise Configuration',
+				arguments: [this],
+			};
 		} else if (itemType === 'category') {
 			this.iconPath = new vscode.ThemeIcon('symbol-class');
 			this.contextValue = 'category';
@@ -37,7 +48,7 @@ export class ConfigurationItem extends vscode.TreeItem {
 			this.iconPath = new vscode.ThemeIcon('note');
 			this.description = template.templateKey ?? '';
 			this.tooltip = `${template.displayName}\ntemplateKey: ${template.templateKey}\nscope: ${template.scope}`;
-			this.contextValue = 'metadataTemplate';
+			this.contextValue = template.scope === 'global' ? 'metadataTemplateGlobal' : 'metadataTemplate';
 			this.command = {
 				command: 'box-vscode-extension.showMetadataTemplate',
 				title: 'Show Metadata Template',
@@ -63,7 +74,29 @@ export class ConfigurationItem extends vscode.TreeItem {
 				title: 'Show Taxonomy Node',
 				arguments: [this],
 			};
+		} else if (itemType === 'enterpriseConfigCategory') {
+			this.iconPath = new vscode.ThemeIcon('symbol-property');
+			this.contextValue = 'enterpriseConfigCategory';
+			this.command = {
+				command: 'box-vscode-extension.showEnterpriseConfiguration',
+				title: 'Show Enterprise Configuration',
+				arguments: [this],
+			};
 		}
+	}
+
+	/** Factory for enterprise config category items. */
+	static enterpriseConfigCategory(
+		label: string,
+		categoryKey: string,
+	): ConfigurationItem {
+		const item = new ConfigurationItem(
+			'enterpriseConfigCategory',
+			label,
+			vscode.TreeItemCollapsibleState.None,
+		);
+		(item as { enterpriseConfigCategoryKey: string }).enterpriseConfigCategoryKey = categoryKey;
+		return item;
 	}
 }
 
@@ -94,8 +127,18 @@ export class ConfigurationProvider implements vscode.TreeDataProvider<Configurat
 	async getChildren(element?: ConfigurationItem): Promise<ConfigurationItem[]> {
 		if (!element) {
 			return [
+				new ConfigurationItem('category', 'Enterprise Configuration', vscode.TreeItemCollapsibleState.Collapsed),
 				new ConfigurationItem('category', 'Metadata Templates', vscode.TreeItemCollapsibleState.Collapsed),
 				new ConfigurationItem('category', 'Metadata Taxonomies', vscode.TreeItemCollapsibleState.Collapsed),
+			];
+		}
+
+		if (element.itemType === 'category' && element.label === 'Enterprise Configuration') {
+			return [
+				ConfigurationItem.enterpriseConfigCategory('Content & Sharing', 'content_and_sharing'),
+				ConfigurationItem.enterpriseConfigCategory('Security', 'security'),
+				ConfigurationItem.enterpriseConfigCategory('Shield', 'shield'),
+				ConfigurationItem.enterpriseConfigCategory('User Settings', 'user_settings'),
 			];
 		}
 

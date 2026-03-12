@@ -127,7 +127,7 @@ export async function promptForDeployTarget(): Promise<vscode.Uri | undefined> {
 	const items: vscode.QuickPickItem[] = [];
 	const uriMap = new Map<string, vscode.Uri>();
 
-	for (const dirName of ['metadata-templates', 'metadata-taxonomies']) {
+	for (const dirName of ['metadata-taxonomies', 'metadata-templates']) {
 		const dirUri = vscode.Uri.joinPath(root, dirName);
 		try {
 			const stat = await vscode.workspace.fs.stat(dirUri);
@@ -152,7 +152,7 @@ export async function promptForDeployTarget(): Promise<vscode.Uri | undefined> {
 	}
 
 	if (items.length === 0) {
-		vscode.window.showWarningMessage('No metadata-templates or metadata-taxonomies directories found in workspace.');
+		vscode.window.showWarningMessage('No metadata-taxonomies or metadata-templates directories found in workspace.');
 		return undefined;
 	}
 

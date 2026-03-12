@@ -340,6 +340,18 @@ function getWebviewHtml(nonce: string): string {
 			return '<option value="' + val + '"' + (val === sel ? ' selected' : '') + '>' + val + '</option>';
 		}
 
+		function toCamelCase(str) {
+			return str.trim()
+				.replace(/[^a-zA-Z0-9\s]/g, '')
+				.split(/\s+/)
+				.map(function(word, i) {
+					if (!word) return '';
+					if (i === 0) return word.charAt(0).toLowerCase() + word.slice(1);
+					return word.charAt(0).toUpperCase() + word.slice(1);
+				})
+				.join('');
+		}
+
 		document.addEventListener('input', function(e) {
 			var t = e.target;
 			var fi = t.getAttribute('data-fi');
@@ -351,6 +363,11 @@ function getWebviewHtml(nonce: string): string {
 				render();
 			} else {
 				fields[idx][prop] = t.value;
+				if (prop === 'displayName') {
+					fields[idx].key = toCamelCase(t.value);
+					var keyInput = document.querySelector('input[data-fi="' + idx + '"][data-prop="key"]');
+					if (keyInput) keyInput.value = fields[idx].key;
+				}
 			}
 		});
 

@@ -59,17 +59,27 @@ export async function openContentPreview(fileId: string, fileName: string): Prom
 
 async function downscopePreviewToken(fileId: string, auth: BoxOAuth): Promise<string> {
 	const resource = `https://api.box.com/2.0/files/${fileId}`;
-	const downscopedToken = await auth.downscopeToken(
-		[
-			// Preview
-			'base_preview', 'item_download', 'root_readwrite', 'annotation_edit', 'annotation_view_all',
-			// Sidebar
-			// 'item_comment', 'item_task',
-			// // Box AI
-			'ai.readwrite',
-		],
-		resource,
-	);
+
+	// Try with full scopes (including Box AI) first, then fall back without AI
+	// if the OAuth app doesn't have that scope enabled.
+	const fullScopes = [
+		'base_preview', 'item_download', 'root_readwrite',
+		'annotation_edit', 'annotation_view_all',
+		// 'ai.readwrite',
+	];
+	const baseScopes = [
+		'base_preview', 'item_download', 'root_readwrite',
+		'annotation_edit', 'annotation_view_all',
+	];
+
+	let downscopedToken;
+	try {
+		downscopedToken = await auth.downscopeToken(fullScopes, resource);
+	} catch {
+		log(ext.out, `[ContentPreview] Full-scope downscope failed (ai.readwrite may not be enabled). Retrying without AI scope.`);
+		downscopedToken = await auth.downscopeToken(baseScopes, resource);
+	}
+
 	const accessToken = downscopedToken.accessToken ?? '';
 	if (!accessToken) {
 		throw new Error('Downscoped token returned empty access token');

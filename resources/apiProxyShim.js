@@ -193,7 +193,10 @@
 
 				self.readyState = 4;
 				if (self.onreadystatechange) { self.onreadystatechange(); }
-				if (self.status >= 200 && self.status < 400) {
+				// A real XMLHttpRequest fires onload for ANY HTTP response (including
+				// 4xx/5xx) and only fires onerror for network-level failures (status 0).
+				// Axios relies on this: onerror → "Network Error"; onload → checks status.
+				if (self.status > 0) {
 					if (self.onload) { self.onload(); }
 				} else {
 					if (self.onerror) { self.onerror(); }

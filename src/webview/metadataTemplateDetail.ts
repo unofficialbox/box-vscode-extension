@@ -488,10 +488,11 @@ function getWebviewHtml(template: MetadataTemplate, nonce: string): string {
 			<button class="copy-btn" data-copy="${esc(templateKey)}">${esc(templateKey)} &#x2398;</button>
 		</div>
 		<div class="action-bar">
-			<button class="primary-btn" id="update-btn">Update Template</button>
+			${scope !== 'global' ? '<button class="primary-btn" id="update-btn">Update Template</button>' : ''}
 			<button class="secondary-btn" id="save-json-btn">Save JSON</button>
-			<button class="danger-btn" id="delete-btn">Delete Template</button>
+			${scope !== 'global' ? '<button class="danger-btn" id="delete-btn">Delete Template</button>' : ''}
 		</div>
+		${scope === 'global' ? '<div class="status-msg info" style="display:block;">Global templates are read-only and cannot be modified.</div>' : ''}
 	</div>
 
 	<div id="status-msg" class="status-msg"></div>
@@ -510,14 +511,13 @@ function getWebviewHtml(template: MetadataTemplate, nonce: string): string {
 		</thead>
 		<tbody id="fields-body"></tbody>
 	</table>
-	<div class="add-field-bar">
-		<button class="add-btn" id="add-field-btn">+ Add Field</button>
-	</div>
+	${scope !== 'global' ? '<div class="add-field-bar"><button class="add-btn" id="add-field-btn">+ Add Field</button></div>' : ''}
 
 	<script nonce="${nonce}">
 	(function() {
 		const vscode = acquireVsCodeApi();
 		const INIT = ${dataJson};
+		const IS_GLOBAL = '${scope}' === 'global';
 
 		// ── State ──
 		let displayName = INIT.displayName;
@@ -536,6 +536,7 @@ function getWebviewHtml(template: MetadataTemplate, nonce: string): string {
 		const statusEl = document.getElementById('status-msg');
 
 		nameInput.value = displayName;
+		if (IS_GLOBAL) { nameInput.readOnly = true; nameInput.style.opacity = '0.7'; }
 		render();
 
 		// ── Render ──
@@ -543,36 +544,38 @@ function getWebviewHtml(template: MetadataTemplate, nonce: string): string {
 			fieldCount.textContent = '(' + fields.length + ')';
 			fieldsBody.innerHTML = fields.map(function(f, i) {
 				const isEnum = f.type === 'enum' || f.type === 'multiSelect';
+				const ro = IS_GLOBAL ? ' readonly' : '';
+				const roStyle = IS_GLOBAL ? ' style="opacity:0.7"' : '';
 				let optHtml = '';
 				if (isEnum) {
 					const tags = f.options.map(function(o, oi) {
 						return '<span class="option-tag">' + esc(o) +
-							' <button class="option-x" data-fi="' + i + '" data-oi="' + oi + '">&times;</button></span>';
+							(IS_GLOBAL ? '' : ' <button class="option-x" data-fi="' + i + '" data-oi="' + oi + '">&times;</button>') + '</span>';
 					}).join('');
 					optHtml = '<div class="options-list">' + tags +
-						'<div class="option-add">' +
+						(IS_GLOBAL ? '' : '<div class="option-add">' +
 						'<input class="option-input" data-fi="' + i + '" placeholder="option" />' +
 						'<button class="option-add-btn" data-fi="' + i + '">+</button>' +
-						'</div></div>';
+						'</div>') + '</div>';
 				}
 
 				const keyCell = f.isNew
-					? '<input class="inline-input mono" data-fi="' + i + '" data-prop="key" value="' + esc(f.key) + '" placeholder="field_key" />'
+					? '<input class="inline-input mono" data-fi="' + i + '" data-prop="key" value="' + esc(f.key) + '" placeholder="field_key"' + ro + roStyle + ' />'
 					: '<button class="copy-btn" data-copy="' + esc(f.key) + '">' + esc(f.key) + ' &#x2398;</button>';
 
 				const typeCell = f.isNew
-					? '<select class="inline-select" data-fi="' + i + '" data-prop="type">' +
+					? '<select class="inline-select" data-fi="' + i + '" data-prop="type"' + (IS_GLOBAL ? ' disabled' : '') + '>' +
 					  opt('string', f.type) + opt('float', f.type) + opt('date', f.type) +
 					  opt('enum', f.type) + opt('multiSelect', f.type) + '</select>'
 					: '<span class="type-badge">' + esc(f.type) + '</span>';
 
 				return '<tr>' +
-					'<td><input class="inline-input" data-fi="' + i + '" data-prop="displayName" value="' + esc(f.displayName) + '" /></td>' +
+					'<td><input class="inline-input" data-fi="' + i + '" data-prop="displayName" value="' + esc(f.displayName) + '"' + ro + roStyle + ' /></td>' +
 					'<td class="key-cell">' + keyCell + '</td>' +
 					'<td>' + typeCell + '</td>' +
-					'<td><input class="inline-input" data-fi="' + i + '" data-prop="description" value="' + esc(f.description) + '" placeholder="description" /></td>' +
+					'<td><input class="inline-input" data-fi="' + i + '" data-prop="description" value="' + esc(f.description) + '" placeholder="description"' + ro + roStyle + ' /></td>' +
 					'<td class="options-cell">' + optHtml + '</td>' +
-					'<td><button class="remove-btn" data-remove="' + i + '" title="Remove field">&times;</button></td>' +
+					(IS_GLOBAL ? '<td></td>' : '<td><button class="remove-btn" data-remove="' + i + '" title="Remove field">&times;</button></td>') +
 					'</tr>';
 			}).join('');
 		}
@@ -583,6 +586,18 @@ function getWebviewHtml(template: MetadataTemplate, nonce: string): string {
 
 		// ── Events ──
 		nameInput.addEventListener('input', function() { displayName = nameInput.value; });
+
+		function toCamelCase(str) {
+			return str.trim()
+				.replace(/[^a-zA-Z0-9\s]/g, '')
+				.split(/\s+/)
+				.map(function(word, i) {
+					if (!word) return '';
+					if (i === 0) return word.charAt(0).toLowerCase() + word.slice(1);
+					return word.charAt(0).toUpperCase() + word.slice(1);
+				})
+				.join('');
+		}
 
 		document.addEventListener('input', function(e) {
 			var t = e.target;
@@ -595,6 +610,11 @@ function getWebviewHtml(template: MetadataTemplate, nonce: string): string {
 				render();
 			} else {
 				fields[idx][prop] = t.value;
+				if (prop === 'displayName' && fields[idx].isNew) {
+					fields[idx].key = toCamelCase(t.value);
+					var keyInput = document.querySelector('input[data-fi="' + idx + '"][data-prop="key"]');
+					if (keyInput) keyInput.value = fields[idx].key;
+				}
 			}
 		});
 

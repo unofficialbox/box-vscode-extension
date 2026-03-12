@@ -8,11 +8,6 @@ import { updateAuthContext } from '../../utils/contextKeys';
 import { waitForOAuthCallback } from '../../utils/oauthServer';
 
 export async function authorizeConnection(): Promise<void> {
-	const config            = vscode.workspace.getConfiguration('box');
-	const savedClientId     = config.get<string>('clientId', '');
-	const savedClientSecret = config.get<string>('clientSecret', '');
-	const savedCallbackUrl  = config.get<string>('callbackUrl', 'http://localhost:3000/callback');
-
 	// Step 1 — Alias
 	const existingAliases = await getConnectionAliases();
 	const aliasInput = await vscode.window.showInputBox({
@@ -33,7 +28,7 @@ export async function authorizeConnection(): Promise<void> {
 		title: 'Box: Authorize Connection  (2 / 4)',
 		prompt: 'Enter your Box application Client ID',
 		placeHolder: 'Client ID from the Box Developer Console',
-		value: savedClientId,
+		value: '',
 		ignoreFocusOut: true,
 		validateInput: v => (!v || !v.trim()) ? 'Client ID is required' : null,
 	});
@@ -44,7 +39,7 @@ export async function authorizeConnection(): Promise<void> {
 		title: 'Box: Authorize Connection  (3 / 4)',
 		prompt: 'Enter your Box application Client Secret',
 		placeHolder: 'Client Secret from the Box Developer Console',
-		value: savedClientSecret,
+		value: '',
 		password: true,
 		ignoreFocusOut: true,
 		validateInput: v => (!v || !v.trim()) ? 'Client Secret is required' : null,
@@ -56,7 +51,7 @@ export async function authorizeConnection(): Promise<void> {
 		title: 'Box: Authorize Connection  (4 / 4)',
 		prompt: 'Enter the full OAuth 2.0 redirect URI — must match your Box app settings',
 		placeHolder: 'http://localhost:3000/callback',
-		value: savedCallbackUrl,
+		value: 'http://localhost:3000/callback',
 		ignoreFocusOut: true,
 		validateInput: v => {
 			if (!v || !v.trim()) { return 'Callback URL is required'; }

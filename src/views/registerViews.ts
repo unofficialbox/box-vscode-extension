@@ -9,7 +9,9 @@ import { openCreateMetadataTemplate } from '../webview/createMetadataTemplate';
 import { openCreateMetadataTaxonomy } from '../webview/createMetadataTaxonomy';
 import { openUIElement } from '../webview/uiElement';
 import { openMetadataQueryBuilder } from '../webview/metadataQueryBuilder';
+import { openEnterpriseConfigDetail, EnterpriseConfigCategory } from '../webview/enterpriseConfigDetail';
 import { getBoxClient } from '../utils/boxClient';
+import { downloadItem } from '../commands/files/downloadItems';
 
 export function registerViews(): vscode.Disposable[] {
 	const allFilesProvider = new AllFilesProvider();
@@ -206,6 +208,13 @@ export function registerViews(): vscode.Disposable[] {
 		}),
 		vscode.commands.registerCommand('box-vscode-extension.openMetadataQueryBuilder', () => {
 			return openMetadataQueryBuilder();
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.showEnterpriseConfiguration', (item?: ConfigurationItem) => {
+			const categoryKey = item?.enterpriseConfigCategoryKey as EnterpriseConfigCategory | undefined;
+			return openEnterpriseConfigDetail(categoryKey);
+		}),
+		vscode.commands.registerCommand('box-vscode-extension.downloadItem', (item: AllFilesItem) => {
+			return downloadItem(item);
 		}),
 	];
 }

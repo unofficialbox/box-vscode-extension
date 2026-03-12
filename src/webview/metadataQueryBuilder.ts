@@ -143,22 +143,23 @@ async function handleExecute(msg: {
 
 		log(ext.out, `[MetadataQuery] Query executed: ${results.entries?.length ?? 0} results returned.`);
 
-		// Downscope token for the Content Explorer UI Element tab
-		let downscopedToken = '';
+		// Use the full access token for the Content Explorer UI Element tab.
+		// When defaultView is 'metadata', the explorer internally calls
+		// metadata_queries/execute_read which requires scopes that cannot
+		// be satisfied by a downscoped token.
+		let accessToken = '';
 		try {
-			const resource = `https://api.box.com/2.0/folders/${msg.ancestorFolderId}`;
-			const scopes = ['base_explorer', 'item_preview', 'item_download', 'root_readwrite'];
-			const tokenInfo = await result.auth.downscopeToken(scopes, resource);
-			downscopedToken = tokenInfo.accessToken ?? '';
+			const tokenInfo = await result.auth.retrieveToken();
+			accessToken = tokenInfo.accessToken ?? '';
 		} catch (err) {
-			log(ext.out, `[MetadataQuery] Token downscope failed: ${err instanceof Error ? err.message : String(err)}`);
+			log(ext.out, `[MetadataQuery] Token retrieval failed: ${err instanceof Error ? err.message : String(err)}`);
 		}
 
 		panel.webview.postMessage({
 			type: 'results',
 			data: results,
 			nextMarker: results.nextMarker ?? '',
-			accessToken: downscopedToken,
+			accessToken,
 			ancestorFolderId: msg.ancestorFolderId,
 			from: msg.from,
 			query: msg.query,
@@ -660,7 +661,6 @@ function getWebviewHtml(
 		var cachedEnterpriseId = '';
 
 		// Explorer state
-		var explorerInitialized = false;
 		var lastAccessToken = '';
 		var lastAncestorFolderId = '';
 		var lastFrom = '';
@@ -760,7 +760,7 @@ function getWebviewHtml(
 				document.getElementById('tab-' + tab).classList.add('active');
 
 				// Lazy-init explorer when switching to UI Element tab
-				if (tab === 'ui-element' && !explorerInitialized && lastAccessToken) {
+				if (tab === 'ui-element' && lastAccessToken) {
 					initExplorer();
 				}
 				return;
@@ -1028,11 +1028,17 @@ function getWebviewHtml(
 
 		// ─── Content Explorer init ──────────────────────
 		function initExplorer() {
-			if (explorerInitialized || !lastAccessToken || !lastFrom) { return; }
-			explorerInitialized = true;
+			if (!lastAccessToken || !lastFrom) { return; }
 
-			var placeholder = document.getElementById('explorer-placeholder');
-			if (placeholder) { placeholder.style.display = 'none'; }
+			// Destroy previous explorer instance by replacing the container entirely.
+			// This ensures the Content Explorer re-initializes fresh each time,
+			// allowing repeated queries even when parameters haven't changed.
+			var wrapper = document.getElementById('explorer-container');
+			wrapper.innerHTML = '';
+			var freshContainer = document.createElement('div');
+			freshContainer.id = 'explorer-inner';
+			freshContainer.style.height = '100%';
+			wrapper.appendChild(freshContainer);
 
 			// Build fields array in metadata.SCOPE.TEMPLATE_KEY.FIELD_KEY format
 			var fieldsList = lastFields
@@ -1079,7 +1085,7 @@ function getWebviewHtml(
 
 			var explorer = new Box.ContentExplorer();
 			explorer.show(lastAncestorFolderId, lastAccessToken, {
-				container: '#explorer-container',
+				container: '#explorer-inner',
 				canPreview: true,
 				canDownload: true,
 				defaultView: 'metadata',
@@ -1239,8 +1245,7 @@ function getWebviewHtml(
 					lastFields = msg.fields || '';
 					lastQuery = msg.query || '';
 					lastQueryParams = msg.queryParams || null;
-					// Reset explorer so it re-initializes with new token/folder
-					explorerInitialized = false;
+					// Clear explorer container so it re-initializes on tab switch
 					document.getElementById('explorer-container').innerHTML =
 						'<div class="explorer-placeholder" id="explorer-placeholder">Switch to UI Element tab to load the Content Explorer.</div>';
 

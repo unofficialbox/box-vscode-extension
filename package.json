@@ -129,6 +129,11 @@
         "icon": "$(add)"
       },
       {
+        "command": "box-vscode-extension.showEnterpriseConfiguration",
+        "title": "Show Enterprise Configuration",
+        "icon": "$(settings-gear)"
+      },
+      {
         "command": "box-vscode-extension.openUIElement",
         "title": "Box: Open UI Element"
       },
@@ -138,7 +143,7 @@
         "icon": "$(search)"
       },
       {
-        "command": "box-vscode-extension.deployToCurrentEnterprise",
+        "command": "box-vscode-extension.deployToDefaultEnterprise",
         "title": "Box: Deploy to Default Box Enterprise",
         "icon": "$(cloud-upload)"
       },
@@ -146,16 +151,6 @@
         "command": "box-vscode-extension.deployToTargetEnterprise",
         "title": "Box: Deploy to Target Box Enterprise",
         "icon": "$(cloud-upload)"
-      },
-      {
-        "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
-        "title": "Box: Diff and Deploy to Default Box Enterprise",
-        "icon": "$(diff)"
-      },
-      {
-        "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
-        "title": "Box: Diff and Deploy to Target Box Enterprise",
-        "icon": "$(diff)"
       },
       {
         "command": "box-vscode-extension.copyFolderId",
@@ -211,6 +206,11 @@
         "command": "box-vscode-extension.clearFilterAllFiles",
         "title": "Clear Filter",
         "icon": "$(clear-all)"
+      },
+      {
+        "command": "box-vscode-extension.downloadItem",
+        "title": "Download",
+        "icon": "$(cloud-download)"
       }
     ],
     "menus": {
@@ -258,9 +258,14 @@
           "group": "inline@3"
         },
         {
-          "command": "box-vscode-extension.deleteItem",
+          "command": "box-vscode-extension.downloadItem",
           "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
           "group": "inline@4"
+        },
+        {
+          "command": "box-vscode-extension.deleteItem",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "inline@5"
         },
         {
           "command": "box-vscode-extension.copyFileId",
@@ -268,9 +273,14 @@
           "group": "inline@1"
         },
         {
-          "command": "box-vscode-extension.deleteItem",
+          "command": "box-vscode-extension.downloadItem",
           "when": "view == box-vscode-extension.allFilesView && viewItem == file",
           "group": "inline@2"
+        },
+        {
+          "command": "box-vscode-extension.deleteItem",
+          "when": "view == box-vscode-extension.allFilesView && viewItem == file",
+          "group": "inline@3"
         },
         {
           "command": "box-vscode-extension.previewFile",
@@ -295,6 +305,11 @@
         {
           "command": "box-vscode-extension.createFolder",
           "when": "view == box-vscode-extension.allFilesView && viewItem == folder",
+          "group": "navigation"
+        },
+        {
+          "command": "box-vscode-extension.downloadItem",
+          "when": "view == box-vscode-extension.allFilesView && viewItem =~ /^(folder|file)$/",
           "group": "navigation"
         },
         {
@@ -360,7 +375,17 @@
       ],
       "explorer/context": [
         {
-          "command": "box-vscode-extension.deployToCurrentEnterprise",
+          "command": "box-vscode-extension.deployToDefaultEnterprise",
+          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies|folders)$/",
+          "group": "box@1"
+        },
+        {
+          "command": "box-vscode-extension.deployToTargetEnterprise",
+          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies|folders)$/",
+          "group": "box@2"
+        },
+        {
+          "command": "box-vscode-extension.deployToDefaultEnterprise",
           "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
           "group": "box@1"
         },
@@ -370,34 +395,24 @@
           "group": "box@2"
         },
         {
-          "command": "box-vscode-extension.deployToCurrentEnterprise",
-          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
+          "command": "box-vscode-extension.deployToDefaultEnterprise",
+          "when": "explorerResourceIsFolder && resourcePath =~ /[/\\\\]folders[/\\\\]/",
           "group": "box@1"
         },
         {
           "command": "box-vscode-extension.deployToTargetEnterprise",
-          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
+          "when": "explorerResourceIsFolder && resourcePath =~ /[/\\\\]folders[/\\\\]/",
           "group": "box@2"
         },
         {
-          "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
-          "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
-          "group": "box@3"
+          "command": "box-vscode-extension.deployToDefaultEnterprise",
+          "when": "!explorerResourceIsFolder && resourcePath =~ /[/\\\\]folders[/\\\\]/",
+          "group": "box@1"
         },
         {
-          "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
-          "when": "resourceFilename =~ /\\.json$/ && resourcePath =~ /metadata-templates|metadata-taxonomies/",
-          "group": "box@4"
-        },
-        {
-          "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
-          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
-          "group": "box@3"
-        },
-        {
-          "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
-          "when": "explorerResourceIsFolder && resourceFilename =~ /^(metadata-templates|metadata-taxonomies)$/",
-          "group": "box@4"
+          "command": "box-vscode-extension.deployToTargetEnterprise",
+          "when": "!explorerResourceIsFolder && resourcePath =~ /[/\\\\]folders[/\\\\]/",
+          "group": "box@2"
         }
       ],
       "commandPalette": [
@@ -482,19 +497,11 @@
           "when": "false"
         },
         {
-          "command": "box-vscode-extension.deployToCurrentEnterprise",
+          "command": "box-vscode-extension.deployToDefaultEnterprise",
           "when": "project.generated && box.authenticated"
         },
         {
           "command": "box-vscode-extension.deployToTargetEnterprise",
-          "when": "project.generated && box.authenticated"
-        },
-        {
-          "command": "box-vscode-extension.diffAndDeployToDefaultEnterprise",
-          "when": "project.generated && box.authenticated"
-        },
-        {
-          "command": "box-vscode-extension.diffAndDeployToTargetEnterprise",
           "when": "project.generated && box.authenticated"
         },
         {
@@ -540,6 +547,14 @@
         {
           "command": "box-vscode-extension.clearFilterAllFiles",
           "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.showEnterpriseConfiguration",
+          "when": "false"
+        },
+        {
+          "command": "box-vscode-extension.downloadItem",
+          "when": "false"
         }
       ]
     },
@@ -584,28 +599,7 @@
         "contents": "No UI elements to display."
       }
     ],
-    "configuration": [
-      {
-        "title": "Box",
-        "properties": {
-          "box.clientId": {
-            "type": "string",
-            "default": "",
-            "description": "Box application Client ID (from the Box Developer Console)"
-          },
-          "box.clientSecret": {
-            "type": "string",
-            "default": "",
-            "description": "Box application Client Secret (from the Box Developer Console)"
-          },
-          "box.callbackUrl": {
-            "type": "string",
-            "default": "http://localhost:3000/callback",
-            "description": "Full OAuth 2.0 redirect URI. Must match the redirect URI registered in your Box app."
-          }
-        }
-      }
-    ]
+    "configuration": []
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
