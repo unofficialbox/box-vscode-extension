@@ -610,7 +610,7 @@
             "title": "Create a Box Project",
             "description": "Scaffold a new workspace with a ``box-project.json`` file that activates the extension.\n\nChoose **Blank** for just the config file, or **Standard** for a full project structure with folders for metadata templates, taxonomies, and more.\n\n[Create Box Project](command:box-vscode-extension.createProject)",
             "media": {
-              "image": "resources/readme/create-project.gif",
+              "image": "https://raw.githubusercontent.com/unofficialbox/box-vscode-extension/main/resources/readme/create-project.gif",
               "altText": "Creating a Box project from the Command Palette"
             },
             "completionEvents": [
@@ -630,7 +630,7 @@
             "title": "Authorize a Connection",
             "description": "Connect the extension to your Box account via OAuth 2.0.\n\nThe wizard will ask for a connection alias, your Client ID, Client Secret, and callback URL, then open a browser to complete the flow.\n\n[Authorize Connection](command:box-vscode-extension.authorize)",
             "media": {
-              "image": "resources/readme/authorize-connection.gif",
+              "image": "https://raw.githubusercontent.com/unofficialbox/box-vscode-extension/main/resources/readme/authorize-connection.gif",
               "altText": "Authorizing a Box connection via the OAuth wizard"
             },
             "completionEvents": [
@@ -642,7 +642,7 @@
             "title": "Browse Files and Folders",
             "description": "Click the **Box** icon in the Activity Bar to open the sidebar. The **All Files** view displays your Box file tree with lazy loading and pagination.\n\nFrom the tree view you can create folders, delete items, copy IDs, filter by name, and refresh.\n\n[Open Box Sidebar](command:workbench.view.extension.box-explorer)",
             "media": {
-              "image": "resources/readme/browse-files.gif",
+              "image": "https://raw.githubusercontent.com/unofficialbox/box-vscode-extension/main/resources/readme/browse-files.gif",
               "altText": "Browsing files and folders in the Box sidebar"
             },
             "completionEvents": [
