@@ -9,3 +9,5 @@ From the tree view you can:
 - **Filter** files by name
 - **Download** files and folders
 - **Right-click** for context menu actions including Box UI Elements
+
+![Browse files and folders](https://raw.githubusercontent.com/unofficialbox/box-vscode-extension/main/resources/readme/browse-files.gif)

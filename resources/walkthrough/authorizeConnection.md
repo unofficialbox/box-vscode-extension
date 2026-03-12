@@ -8,3 +8,5 @@ The wizard will ask for:
 3. A **callback URL** (default: `http://localhost:3000/callback`)
 
 A browser window opens to complete the OAuth flow. Once authorized, your connection appears in the status bar.
+
+![Authorize a Box connection](https://raw.githubusercontent.com/unofficialbox/box-vscode-extension/main/resources/readme/authorize-connection.gif)
